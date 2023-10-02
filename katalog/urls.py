@@ -1,0 +1,6 @@
+from django.urls import path
+from .views import *
+urlpatterns = [
+    path('make-katalog', make_book_dataframe, name="make-book"),
+    path('get-books', get_books, name="get-books" ),
+]
