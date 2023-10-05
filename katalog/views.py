@@ -8,6 +8,18 @@ import time
 import re
 # Create your views here.
 
+def aaaa_create_book(row, book_list, res_list):
+    name = str(row.Title)
+
+    book = Book(
+        title=name,
+        author = row.Authors,
+        subject = row.Subjects
+    )
+    
+    book_list.append(book)
+    res_list.append(str(book))
+
 # USER GAK BOLEH AKSES
 def make_book_dataframe(request):
     source= os.path.join(BASE_DIR, 'datasets')
@@ -19,20 +31,12 @@ def make_book_dataframe(request):
     tm = time.time()
 
     book_list = []
-    printed = True
-    for row in book_dataset.itertuples():
-        name = row.Title
-        name = str(name)
-        name.replace("\n", " ")
-        name.replace("\r", " ")
-        book = Book(
-            title=name,
-            author = row.Authors,
-            subject = row.Subjects
-        )
-        book_list.append(book)
-
-        res+=str(book)+"\n"
+    res_list = []
+    book_dataset.apply(
+        lambda row,book_list,res_list: aaaa_create_book(row, book_list,res_list),
+        axis=1,
+        book_list=book_list,
+        res_list=res_list)
     
     print(f"pandas took {time.time() - tm} seconds")
     tm = time.time()
@@ -41,8 +45,9 @@ def make_book_dataframe(request):
 
     print(f"django took {time.time() - tm} seconds")
 
-    return HttpResponse(res, content_type="text/plain")
-    
+    return HttpResponse('\n'.join(res_list), content_type="text/plain")
+
+
 def search_book(request, searched_book):
     all_books = Book.objects.all()
     all_books_name = [(str(b.title).lower(), str(b.author).lower()) for b in all_books]
