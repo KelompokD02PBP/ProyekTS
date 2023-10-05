@@ -56,7 +56,7 @@ def search_book(request, searched_book):
     regex_to_search_end = rf".*{searched_book}^"
 
     index = 0
-
+    tm = time.time()
     for tuple in all_books_name:
 
         match = bool(re.search(regex_to_search, tuple[0])) or bool(re.search(regex_to_search, tuple[1]))\
@@ -65,8 +65,9 @@ def search_book(request, searched_book):
         if(match):
             res.add(all_books[index])
         index+=1
-    
+    print(f"search took {time.time() - tm} seconds") #12 second
     found_books = ""
+
     for b in res:
         found_books+=str(b)+"\n"
     return HttpResponse(found_books)
