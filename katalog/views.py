@@ -1,44 +1,35 @@
 from django.shortcuts import render
-import pandas as pd
 from .models import Book
 from django.http import HttpResponse
 from proyekts.settings import BASE_DIR
+import pandas as pd
+import csv
 import os
 import time
 import re
 # Create your views here.
 
-def aaaa_create_book(row, book_list, res_list):
-    name = str(row.Title)
-
-    book = Book(
-        title=name,
-        author = row.Authors,
-        subject = row.Subjects
-    )
-    
-    book_list.append(book)
-    res_list.append(str(book))
-
 # USER GAK BOLEH AKSES
 def make_book_dataframe(request):
     source= os.path.join(BASE_DIR, 'datasets')
-    res=""
-    book_dataset = pd.read_csv(source+'\\pg_catalog.csv', index_col="Text#", dtype=object)
-    
-    print(f"{len(book_dataset)} books test:")
+    print("all (71692) books test:")
 
     tm = time.time()
 
     book_list = []
     res_list = []
-    book_dataset.apply(
-        lambda row,book_list,res_list: aaaa_create_book(row, book_list,res_list),
-        axis=1,
-        book_list=book_list,
-        res_list=res_list)
+    with open(source+'/pg_catalog.csv', newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            book = Book(
+                title = row["Title"].replace("\n", " ").replace("\r"," "),
+                author = row["Authors"],
+                subject = row["Subjects"]
+            )
+            book_list.append(book)
+            res_list.append(str(book))
     
-    print(f"pandas took {time.time() - tm} seconds")
+    print(f"csv took {time.time() - tm} seconds")
     tm = time.time()
 
     Book.objects.bulk_create(book_list)
