@@ -7,4 +7,4 @@ class Book(models.Model):
     subject = models.TextField()
     
     def __str__(self) -> str:
-        return str(self.title)+" "+str(self.author)
+        return "Title: "+str(self.title)+" ; Author: "+str(self.author)
