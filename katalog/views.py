@@ -22,9 +22,9 @@ def aaaa_create_book(row, book_list, res_list):
 
 # USER GAK BOLEH AKSES
 def make_book_dataframe(request):
-    source= os.path.join(BASE_DIR, 'datasets')
+    source= os.path.join(BASE_DIR, 'datasets\\Books')
     res=""
-    book_dataset = pd.read_csv(source+'\\pg_catalog.csv', index_col="Text#", dtype=object)
+    book_dataset = pd.read_csv(source+'\\Books.csv', index_col="Text#", dtype=object)
     
     print(f"{len(book_dataset)} books test:")
 
