@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
+from katalog.views import Book
 
 # Create your views here.
 def show_main(request):
@@ -12,6 +13,7 @@ def show_main(request):
     
     if request.user:
         context['name'] = request.user.username
+        context['books'] = show_katalog()
 
     return render(request, "main.html", context)
 
@@ -50,3 +52,15 @@ def logout_user(request):
     response = HttpResponseRedirect(reverse('main:login'))
     response.delete_cookie('last_login')
     return response
+
+def show_katalog():
+    result=[]
+    books = Book.objects.all()
+    for b in books:
+        result+=[b]
+        
+    return result
+
+def book_review(request, id):
+    book = Book.objects.get(pk=id)
+    return HttpResponse(book, content_type="text/plain")
