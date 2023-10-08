@@ -11,20 +11,26 @@ import re
 
 # USER GAK BOLEH AKSES
 def make_book_dataframe(request):
-    source= os.path.join(BASE_DIR, 'datasets')
+    source= os.path.join(BASE_DIR, 'datasets\\Books.csv')
     print("all (71692) books test:")
 
     tm = time.time()
 
     book_list = []
     res_list = []
-    with open(source+'/pg_catalog.csv', newline='', encoding='utf-8') as csvfile:
+    with open(source+'/Books.csv', newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             book = Book(
-                title = row["Title"].replace("\n", " ").replace("\r"," "),
-                author = row["Authors"],
-                subject = row["Subjects"]
+                isbn = row['ISBN'],
+                title = row["Book-Title"].replace("\n", " ").replace("\r"," "),
+                author = row["Book-Author"],
+                # subject = row["Subjects"]
+                year_of_publish = row['Year-Of-Publication'],
+                publisher = row['Publisher'],
+                image_url_s = row['Image-URL-S'],
+                image_url_m = row['Image-URL-M'],
+                image_url_l = row['Image-URL-L']
             )
             book_list.append(book)
             res_list.append(str(book))
@@ -73,7 +79,7 @@ def search_book(request, searched_book):
     found_books = ""
 
     for b in res:
-        found_books+=str(b)+"\n"
+        found_books+=(str(b)+"\n\n")
 
     dic = request.session['last_searched']
     dic[searched_book]=found_books
@@ -82,7 +88,7 @@ def search_book(request, searched_book):
 
     # print(request.session['last_searched'])
     
-    return HttpResponse(found_books)
+    return HttpResponse(found_books, content_type="text/plain")
     
 def get_books(request):
     books = Book.objects.all()
