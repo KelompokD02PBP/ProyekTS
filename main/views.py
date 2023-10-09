@@ -1,16 +1,19 @@
 import datetime
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, HttpResponseNotFound
 from django.urls import reverse
+
 from katalog.models import Book, AppUser
-from django.contrib.auth.models import User
 from katalog.views import search_book
 
-# Create your views here.
-# page=int page keberapa
+from django.contrib.auth.models import User
+
+from django.views.decorators.csrf import csrf_exempt
+
 def show_main(request):
     context = {}
     
@@ -153,5 +156,18 @@ def search_katalog(to_find ,page_num):
     return result
 
 def book_review(request, id):
+    context={}
     book = Book.objects.get(pk=id)
-    return HttpResponse(book, content_type="text/plain")
+    context['book']=book
+    return render(request, 'book.html', context)
+
+@csrf_exempt
+def add_like_ajax(request):
+    print("in add_like_ajax views.py")
+    if request.method == 'POST':
+        id = request.POST.get("id")
+        book = Book.objects.get(pk=id)
+        print(book)
+        
+        return HttpResponse(b"LIKED", status=201)
+    return HttpResponseNotFound()
