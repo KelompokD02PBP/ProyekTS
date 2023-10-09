@@ -45,14 +45,14 @@ def make_book_dataframe(request):
     return HttpResponse('\n'.join(res_list), content_type="text/plain")
 
 
-def search_book(request, searched_book):
+def search_book(searched_book):
     tm = time.time()
-    if 'last_searched' in request.session:
-        if searched_book.lower() in request.session['last_searched'].keys():
-            print(f"searchmemo {searched_book} took {time.time() - tm} seconds")
-            return HttpResponse(request.session['last_searched'][searched_book.lower()])
-    else:
-        request.session['last_searched']={}
+    # if 'last_searched' in request.session:
+        # if searched_book.lower() in request.session['last_searched'].keys():
+        #     print(f"searchmemo {searched_book} took {time.time() - tm} seconds")
+        #     return HttpResponse(request.session['last_searched'][searched_book.lower()])
+    # else:
+    #     request.session['last_searched']={}
 
     all_books = Book.objects.all()
     all_books_name = [(str(b.title).lower(), str(b.author).lower()) for b in all_books]
@@ -76,19 +76,21 @@ def search_book(request, searched_book):
             res.add(all_books[index])
         index+=1
     print(f"search {searched_book} took {time.time() - tm} seconds") #12.358 second #10.57
-    found_books = ""
+    # found_books = ""
 
-    for b in res:
-        found_books+=(str(b)+"\n\n")
+    # for b in res:
+        # found_books+=(str(b)+"\n\n")
 
-    dic = request.session['last_searched']
-    dic[searched_book]=found_books
 
-    request.session.modified=True
+    # dic = request.session['last_searched']
+    # dic[searched_book]=found_books
 
-    # print(request.session['last_searched'])
+    # request.session.modified=True
+
+    # # print(request.session['last_searched'])
     
-    return HttpResponse(found_books, content_type="text/plain")
+    # return HttpResponse(found_books, content_type="text/plain")
+    return res
     
 def get_books(request):
     books = Book.objects.all()

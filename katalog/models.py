@@ -19,9 +19,10 @@ class Book(models.Model):
 
 class AppUser(models.Model):
     user = models.OneToOneField(on_delete= models.CASCADE, to=User)
-    email = models.EmailField()
     phone_number = models.CharField(max_length=20)
     liked_books = models.ManyToManyField(Book)
 
     def __str__(self):
         return self.user.get_username() +" liked books: "+str(self.liked_books.all())
+    
+    
