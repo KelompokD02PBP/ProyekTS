@@ -19,3 +19,4 @@ Kita mengambil books.csv dari
 https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset/?select=Books.csv
 
 Role dari pengguna pada website ini hanya sebagai reviewer dan pengomentar terhadap buku.
+
