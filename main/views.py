@@ -5,15 +5,47 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
-from katalog.views import Book
+from katalog.models import Book, AppUser
+from django.contrib.auth.models import User
+from katalog.views import search_book
 
 # Create your views here.
-def show_main(request):
+# page=int page keberapa
+def show_main(request, page_num):
     context = {}
+    print("page num:",type(page_num), page_num)
     
     if request.user:
         context['name'] = request.user.username
-        context['books'] = show_katalog()
+        context['books'] = get_katalog(page_num)
+        context['page_num'] = page_num
+
+    return render(request, "main.html", context)
+
+'''
+Show main jika search
+'''
+def show_main_search(request):
+    context = {}
+
+    # print(request.GET.get("search_bar"))
+    to_find = request.GET.get("search_bar")
+    page_num =1
+
+    if request.user:
+        if 'last_searched' in request.session:
+            if to_find.lower() in request.session['last_searched'].keys():
+                return HttpResponse(request.session['last_searched'][to_find.lower()])
+        else:
+            request.session['last_searched']={}
+
+        
+        context['name'] = request.user.username
+        context['books'] = search_katalog(to_find, page_num)
+        context['page_num'] = page_num
+
+        dic = request.session['last_searched']
+        dic[to_find.lower()] = context['books']
 
     return render(request, "main.html", context)
 
@@ -38,7 +70,7 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            response = HttpResponseRedirect(reverse("main:show_main"))
+            response = HttpResponseRedirect(reverse("main:show_main", kwargs={'page_num':1}))
             response.set_cookie('last_login', str(datetime.datetime.now()), max_age=10000)
             messages.success(request, 'Hello ' + user.username + "!")
             return response
@@ -53,11 +85,25 @@ def logout_user(request):
     response.delete_cookie('last_login')
     return response
 
-def show_katalog():
+def get_katalog(page_num):
     result=[]
     books = Book.objects.all()
-    for b in books:
-        result+=[b]
+    for i in range (page_num*100-100, page_num*100):
+        result+=[books[i]]
+        
+    return result
+
+'''
+membuat daftar yang dicari
+'''
+
+def search_katalog(to_find ,page_num):
+    result=[]
+    books = list(search_book(to_find))
+    i=page_num*100-100
+    while(i<len(books) and i<page_num*100):
+        result+=[books[i]]
+        i+=1
         
     return result
 
