@@ -11,9 +11,21 @@ from katalog.views import search_book
 
 # Create your views here.
 # page=int page keberapa
-def show_main(request, page_num):
+def show_main(request):
     context = {}
-    print("page num:",type(page_num), page_num)
+    
+    if request.user:
+        context['name'] = request.user.username
+        context['page_num']=-1 #Kalo blm login gk bisa ngapa-ngapain
+
+        if request.user.id !=None: #Kalo udh login bisa liat halaman
+            context['page_num']=1
+            context['books']=get_katalog(1)
+
+    return render(request, "main.html", context)
+
+def show_main_page(request, page_num):
+    context = {}
     
     if request.user:
         context['name'] = request.user.username
@@ -25,30 +37,45 @@ def show_main(request, page_num):
 '''
 Show main jika search
 '''
-def show_main_search(request):
+books_last_searched=[] #simpen search sebelumnya biar bisa next/prior page dengan cepat
+last_searched="" #simpen kata yang di search terakhir
+
+def show_main_search(request, page_num):
+    global books_last_searched
+    global last_searched
     context = {}
 
-    # print(request.GET.get("search_bar"))
+    # MASIH ERROR DI BAGIAN RE-SEARCH
     to_find = request.GET.get("search_bar")
-    page_num =1
-
-    if request.user:
-        if 'last_searched' in request.session:
-            if to_find.lower() in request.session['last_searched'].keys():
-                return HttpResponse(request.session['last_searched'][to_find.lower()])
-        else:
-            request.session['last_searched']={}
-
+    print("last_searched:",last_searched)
         
+    if request.user:
         context['name'] = request.user.username
-        context['books'] = search_katalog(to_find, page_num)
         context['page_num'] = page_num
+        context['from_search']=True
+        
+        # yang dicari beda lagi, kosongin list sebelumnya
+        # to_find!=None buat pastiin bukan gr gr refresh/nextpage
 
-        dic = request.session['last_searched']
-        dic[to_find.lower()] = context['books']
+        if to_find!=None and len(to_find)==0:
+            return HttpResponseRedirect(reverse("main:show_main_page", kwargs={'page_num':1}))
+
+        if to_find!=None and last_searched!=to_find:
+            books_last_searched=[]
+            last_searched=""
+        
+        # kalo blm pernah search atau search hal baru
+        if len(books_last_searched)==0:
+            books = search_katalog(to_find, page_num)
+            context['books'] = books
+
+            request.session.modified=True
+        # ganti page
+        else:
+            books = search_katalog("", page_num)
+            context['books'] = books
 
     return render(request, "main.html", context)
-
 
 def register(request):
     form = UserCreationForm()
@@ -70,7 +97,7 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            response = HttpResponseRedirect(reverse("main:show_main", kwargs={'page_num':1}))
+            response = HttpResponseRedirect(reverse("main:show_main_page", kwargs={'page_num':1}))
             response.set_cookie('last_login', str(datetime.datetime.now()), max_age=10000)
             messages.success(request, 'Hello ' + user.username + "!")
             return response
@@ -96,15 +123,33 @@ def get_katalog(page_num):
 '''
 membuat daftar yang dicari
 '''
-
 def search_katalog(to_find ,page_num):
-    result=[]
-    books = list(search_book(to_find))
-    i=page_num*100-100
-    while(i<len(books) and i<page_num*100):
-        result+=[books[i]]
-        i+=1
-        
+    global books_last_searched
+    global last_searched
+    
+    # search hal baru
+    if len(books_last_searched)==0:
+        result=[]
+        books = list(search_book(to_find))
+        i=page_num*100-100
+
+        books_last_searched = books
+        last_searched = to_find
+        while(i<len(books) and i<page_num*100):
+            result.append(books[i])
+            i+=1
+
+    # ganti page
+    else:
+        result=[]
+        books = books_last_searched
+        i=page_num*100-100
+        # print("book: ",books)
+
+        while(i<len(books) and i<page_num*100):
+            result.append(books[i])
+            i+=1
+
     return result
 
 def book_review(request, id):
