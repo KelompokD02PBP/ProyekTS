@@ -8,7 +8,28 @@
         {% for message in messages %}  
             <li>{{ message }}</li>  
             {% endfor %}  
-    </ul>   
+    </ul>
 {% endif %}
 
+{% if page_num != -1 %}
+<form name="search_bar" method ="GET" action="{% url 'main:show_main_search' %}">
+    <label for="search_bar">Search</label>
+    <input type="text" id="search_bar" name="search_bar"><br><br>
+    <input type="submit">
+</form>
+
+<div id="katalog">
+    {% for book in books %}
+        <img src={{book.image_url_s}} alt ={{book.title}}>
+        <a href="{% url 'main:book_review' book.pk %}">{{book.title}}</a>
+        <br/>
+    {% endfor %} 
+</div>
+<a href="{% url 'main:show_main' page_num|add:"-1"  %}">
+    <button>PrevPage</button>
+</a>
+<a href="{% url 'main:show_main' page_num|add:"+1"  %}">
+    <button>NextPage</button>
+</a>
+{% endif %}
 {% endblock content %}
