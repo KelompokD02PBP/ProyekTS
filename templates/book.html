@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <p>ISBN: {{book.isbn}}</p>
+    <h2>{{book.title}}</h2>
+    <img src={{book.image_url_m}} alt={{book.title}}>
+    <h4>Written by {{book.author}}</h4>
+    <p>Published in {{book.year_of_publish}}</p>
+
+    <button id="like" onclick="like({{book.pk}})">Like</button>
+
+    <script>
+        async function like(id){
+            const formData = new FormData()
+            formData.append("id", id)
+            
+            fetch("{% url 'main:add_like_ajax' %}", {
+                method: "POST",
+                body: formData
+            })
+            console.log("clicked")
+            document.getElementById('like').style.color = "blue";
+        }
+    </script>
+{%endblock%}

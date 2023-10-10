@@ -8,7 +8,43 @@
         {% for message in messages %}  
             <li>{{ message }}</li>  
             {% endfor %}  
-    </ul>   
+    </ul>
 {% endif %}
 
+
+{% if page_num != -1 %}
+
+    <form name="search_bar" method ="GET" action="{% url 'main:show_main_search' 1 %}">
+        <label for="search_bar">Search</label>
+        <input type="text" id="search_bar" name="search_bar"><br><br>
+        <input type="submit">
+    </form>
+    <hr>
+
+    <div id="katalog">
+        {% for book in books %}
+            <img src={{book.image_url_s}} alt ={{book.title}}>
+            <a href="{% url 'main:book_review' book.pk %}">{{book.title}}</a>
+            <br/>
+        {% endfor %} 
+    </div>
+    <!-- Kalo gk pake search data bukunya dari all -->
+    {% if not from_search %}
+        <a href="{% url 'main:show_main_page' page_num|add:"-1"  %}">
+            <button>PrevPage</button>
+        </a>
+        <a href="{% url 'main:show_main_page' page_num|add:"+1"  %}">
+            <button>NextPage</button>
+        </a>
+    {% endif %}
+    <!-- Kalo pake search data bukunya dari hasil filter -->
+    {% if from_search %}
+            <a href="{% url 'main:show_main_search' page_num|add:"-1"%}">
+                <button>PrevPageSearch</button>
+            </a>
+            <a href="{% url 'main:show_main_search' page_num|add:"+1"%}">
+                <button>NextPageSearch</button>
+            </a>
+    {% endif %}
+{% endif %}
 {% endblock content %}
