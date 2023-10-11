@@ -2,7 +2,7 @@
 ## Proyek Tengah Semester dari kelompok D02 PBP
 Nama-nama anggota kelompok
 1. Venedict Chen - 2206024436
-2. Sefriano Edsel Tjie - 2206818966
+2. Sefriano Edsel Jieftara Djie - 2206818966
 3. Kenichi Komala - 2206081452
 4. Shabhi Aliyya Siyauqi Dzakia - 2206083741
 5. Sabina Maritza Moenzil - 2206027583
@@ -14,6 +14,23 @@ Jadi dengan website ini user bisa memberi rating mereka terhadap suatu buku dan 
 
 ## Daftar modul yang akan diimplementasikan
 Kami menggunakan django untuk framework websitenya dan menggunakan HTML,CSS, BootStrap, serta Javascript untuk client side programming. Untuk memproses dataset bukunya kita menggunakan pandas.
+Kita akan mengimplementasikan :
+### Page login dan register
+>Page yang akan muncul saat user masuk ke website pertama kali. Pada page ini user akan diminta untuk memasukan data dan akan diautentikasi datanya.
+### Page katalog/main
+>Pada page ini akan ditampilkan semua buku yang bisa direview. Pada page ini akan ditampilkan 100 buku pertama pada daftar katalog. Lalu ada tombol next page dan prevpage untuk melihat 100 buku lain.
+### Page tiap buku
+>Pada page ini user bisa membuat komentar terhadap buku dan menambahkan buku ke daftar favoritnya
+### Fitur search
+>Dengan fitur ini user bisa melakukan search pada main page untuk mendapatkan buku yang sudah terfilter
+### Fitur favorit untuk tiap user
+>Setiap user dapat menambahkan buku yang disukai ke
+### Fitur sort
+>Dengan fitur ini, user bisa mengurutkan buku yang keluar dalam urutan lexikografi, tahun publish
+### Fitur filter
+>Menunjukan user buku yang pernah difavorit
+### Fitur komentar pada tiap buku
+>Dengan fitur ini, user bisa membuat komentar pada page buku ke - n
 
 ## Sumber dataset katalog buku
 Kami mengambil data set  `books.csv` dari
