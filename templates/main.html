@@ -40,10 +40,10 @@
     <!-- Kalo pake search data bukunya dari hasil filter -->
     {% if from_search %}
             <a href="{% url 'main:show_main_search' page_num|add:"-1"%}">
-                <button>PrevPageSearch</button>
+                <button>PrevPage</button>
             </a>
             <a href="{% url 'main:show_main_search' page_num|add:"+1"%}">
-                <button>NextPageSearch</button>
+                <button>NextPage</button>
             </a>
     {% endif %}
 {% endif %}

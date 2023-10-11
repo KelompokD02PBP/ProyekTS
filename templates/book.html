@@ -8,7 +8,8 @@
     <p>Published in {{book.year_of_publish}}</p>
 
     <button id="like" onclick="like({{book.pk}})">Like</button>
-
+    <table id ="likedBy">
+    </table>
     <script>
         async function like(id){
             const formData = new FormData()
@@ -18,8 +19,29 @@
                 method: "POST",
                 body: formData
             })
-            console.log("clicked")
             document.getElementById('like').style.color = "blue";
+            
+            var likes = await see_like(id)
+            res = `<tr>
+                <th>by</th>
+                <th>book</th>
+                </tr>`
+                res+=`\n<tr>
+                    <td>${l.fields.user}</td>
+                    <td>${l.fields.book}</td>
+                    <p>ANJING</p>
+                </tr>` 
+            })
+            document.getElementById('likedBy').innerHTML =res
+        }
+
+        async function see_like(id){
+            const formData= new FormData()
+            formData.append("id", id)
+            return fetch("{% url 'main:see_like_ajax' %}", {
+                method: "POST",
+                body: formData
+            }).then((res) => res.json())
         }
     </script>
 {%endblock%}

@@ -91,7 +91,18 @@ def search_book(searched_book):
     
     # return HttpResponse(found_books, content_type="text/plain")
     return res
+
+def search_book2(book):
+    tm = time.time() 
+    # HOLY SHIT INI KENCENG BANGET
+    books = Book.objects.filter(title__istartswith=book)| Book.objects.filter(title__iendswith=book) | Book.objects.filter(title__icontains=book)
     
+    print(f"search took {time.time() - tm} seconds")
+    for x in books:
+        print(x.pk)
+    
+    return books
+
 def get_books(request):
     books = Book.objects.all()
     for b in books:
