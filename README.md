@@ -1,5 +1,5 @@
-# ProyekTS
-## Proyek Tengah Semester dari kelompok D02 PBP
+# 💻 ProyekTS
+## 🏫 Proyek Tengah Semester dari kelompok D02 PBP
 Nama-nama anggota kelompok
 1. Venedict Chen - 2206024436
 2. Sefriano Edsel Jieftara Djie - 2206818966
