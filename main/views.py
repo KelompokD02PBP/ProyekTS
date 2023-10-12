@@ -121,7 +121,7 @@ def logout_user(request):
 def get_katalog(page_num):
     result=[]
     books = Book.objects.all()
-    for i in range (page_num*100-100, page_num*100):
+    for i in range (page_num*50-50, page_num*50):
         result+=[books[i]]
         
     return result
@@ -137,11 +137,11 @@ def search_katalog(to_find ,page_num):
     if len(books_last_searched)==0:
         result=[]
         books = list(search_book2(to_find))
-        i=page_num*100-100
+        i=page_num*50-50
 
         books_last_searched = books
         last_searched = to_find
-        while(i<len(books) and i<page_num*100):
+        while(i<len(books) and i<page_num*50):
             result.append(books[i])
             i+=1
 
@@ -149,9 +149,9 @@ def search_katalog(to_find ,page_num):
     else:
         result=[]
         books = books_last_searched
-        i=page_num*100-100
+        i=page_num*50-50
 
-        while(i<len(books) and i<page_num*100):
+        while(i<len(books) and i<page_num*50):
             result.append(books[i])
             i+=1
 
@@ -168,16 +168,23 @@ def book_review(request, id):
 
 @csrf_exempt
 def add_like_ajax(request):
-    print("in add_like_ajax views.py")
+    # print("in add_like_ajax views.py")
     if request.method == 'POST':
         id = request.POST.get("id")
         book = Book.objects.get(pk=id)
-        # print("anjing", book, request.user)
-        
-        like = Like(user = request.user,
-                    book = book
-                    )
-        like.save()
+
+        has_like = Like.objects.filter(book = book, user = request.user)
+        print("has like =",has_like)
+
+        print("anjing", book, request.user)
+        if len(has_like)==0:
+            like = Like(user = request.user,
+                        book = book
+                        )
+            print("like",like)
+            like.save()
+        else:
+            has_like.delete()
 
         return HttpResponse(b"LIKED", status=201)
     return HttpResponseNotFound()
@@ -187,9 +194,27 @@ def see_like_ajax(request):
     print("in add_like_ajax views.py")
     if request.method == 'POST':
         id = request.POST.get("id")
+        print("id",id)
         book = Book.objects.get(pk=id)
         likes = Like.objects.filter(book=book)
-        print("likes", type(likes))
+        # print("likes", type(likes))
 
+        return HttpResponse(serializers.serialize('json',likes))
+    return HttpResponseNotFound()
+
+@csrf_exempt
+def like_dislike_ajax(request):
+    print("in like_dislike views.py")
+    if request.method == 'POST':
+        id = request.POST.get("id")
+        book = Book.objects.get(pk=id)
+        likes = Like.objects.filter(book=book, user = request.user)
+        print(len(likes))
+        if len(likes)==1:
+            print("like")
+            print(likes)
+        else:
+            print("dislike")
+            print(likes)
         return HttpResponse(serializers.serialize('json',likes))
     return HttpResponseNotFound()

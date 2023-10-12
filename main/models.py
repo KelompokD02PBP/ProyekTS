@@ -10,4 +10,4 @@ class Like(models.Model):
     book = models.ForeignKey(to=Book, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.user.id, "likes", self.book.title
+        return str(self.user.id)+"likes"+str(self.book.title)

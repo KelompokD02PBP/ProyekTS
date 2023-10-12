@@ -10,22 +10,33 @@
     <button id="like" onclick="like({{book.pk}})">Like</button>
     <table id ="likedBy">
     </table>
+
     <script>
         async function like(id){
             const formData = new FormData()
             formData.append("id", id)
+
+            //Like atau dislike?
+            const form = new FormData()
+            form.append("id", id)
             
             fetch("{% url 'main:add_like_ajax' %}", {
                 method: "POST",
                 body: formData
-            })
-            document.getElementById('like').style.color = "blue";
-            
+            }).then(data => fetch("{% url 'main:like_dislike' %}",{
+                method : "POST",
+                body : form
+            })).then((like_or_dislike) => like_or_dislike.json()).then((res) => did_like(res)).then((data) => build_like(id))
+        }
+
+        async function build_like(id){
             var likes = await see_like(id)
             res = `<tr>
                 <th>by</th>
                 <th>book</th>
                 </tr>`
+            console.log("likes "+ likes)
+            likes.forEach((l)=>{
                 res+=`\n<tr>
                     <td>${l.fields.user}</td>
                     <td>${l.fields.book}</td>
@@ -33,6 +44,25 @@
                 </tr>` 
             })
             document.getElementById('likedBy').innerHTML =res
+        }
+
+        
+        function did_like(like_or_dislike){
+            var like_or_dislike = like_or_dislike
+            var length_temp=0
+            console.log(like_or_dislike)
+            like_or_dislike.forEach((lod)=>{
+                length_temp+=1
+            })
+
+            console.log(length_temp)
+
+            if(length_temp==1){
+                document.getElementById('like').style.color = "blue";
+            }
+            else{
+                document.getElementById('like').style.color = "black";
+            }
         }
 
         async function see_like(id){
