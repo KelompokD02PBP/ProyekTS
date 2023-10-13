@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <body>
     <p>ISBN: {{book.isbn}}</p>
     <h2>{{book.title}}</h2>
     <img src={{book.image_url_m}} alt={{book.title}}>
@@ -12,6 +13,18 @@
     </table>
 
     <script>
+        window.onload = function(){
+            const form = new FormData()
+            form.append("id", {{book.pk}})
+            console.log({{book.pk}})
+
+            fetch("{% url 'main:like_dislike' %}",{
+                method : "POST",
+                body : form
+            }).then((like_or_dislike) => like_or_dislike.json()).then((res) => did_like(res)).then((data) => build_like({{book.pk}}))
+        }
+
+        // ID user
         async function like(id){
             const formData = new FormData()
             formData.append("id", id)
@@ -26,7 +39,7 @@
             }).then(data => fetch("{% url 'main:like_dislike' %}",{
                 method : "POST",
                 body : form
-            })).then((like_or_dislike) => like_or_dislike.json()).then((res) => did_like(res)).then((data) => build_like(id))
+            })).then((like_or_dislike) => like_or_dislike.json()).then((res) => did_like(res)).then((data) => build_like({{book.pk}}))
         }
 
         async function build_like(id){
@@ -40,7 +53,6 @@
                 res+=`\n<tr>
                     <td>${l.fields.user}</td>
                     <td>${l.fields.book}</td>
-                    <p>ANJING</p>
                 </tr>` 
             })
             document.getElementById('likedBy').innerHTML =res
@@ -50,7 +62,7 @@
         function did_like(like_or_dislike){
             var like_or_dislike = like_or_dislike
             var length_temp=0
-            console.log(like_or_dislike)
+            console.log("did_like "+ like_or_dislike)
             like_or_dislike.forEach((lod)=>{
                 length_temp+=1
             })
@@ -65,9 +77,10 @@
             }
         }
 
-        async function see_like(id){
+        //id buku
+        async function see_like(bookId){
             const formData= new FormData()
-            formData.append("id", id)
+            formData.append("id", bookId)
             return fetch("{% url 'main:see_like_ajax' %}", {
                 method: "POST",
                 body: formData

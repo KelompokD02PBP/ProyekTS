@@ -164,6 +164,7 @@ def book_review(request, id):
         book = Book.objects.get(pk=id)
         context['book']=book
         context['name'] = request.user.username
+        context['id'] = request.user.pk
     return render(request, 'book.html', context)
 
 @csrf_exempt
@@ -208,6 +209,7 @@ def like_dislike_ajax(request):
     if request.method == 'POST':
         id = request.POST.get("id")
         book = Book.objects.get(pk=id)
+        print("book in like_dislike",book)
         likes = Like.objects.filter(book=book, user = request.user)
         print(len(likes))
         if len(likes)==1:
