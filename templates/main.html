@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% block content %}
 <h2> Hello world! </h2>
 
@@ -21,13 +20,28 @@
     </form>
     <hr>
 
-    <div id="katalog">
+    <div id="katalog" style="display: flex; flex-wrap: wrap;">
         {% for book in books %}
-            <img src={{book.image_url_s}} alt ={{book.title}}>
-            <a href="{% url 'main:book_review' book.pk %}">{{book.title}}</a>
-            <br/>
-        {% endfor %} 
+            <div class="card" style="width: 18rem; margin: 10px;">
+                <div style="height: 250px;display: flex; justify-content: center;">
+                    <img class="card-img-top" src="{{ book.image_url_l }}" alt="Card image cap" style="height: 250px; object-fit: cover;">
+                    
+                </div> 
+                <div class="container-card" style="display: flex;justify-content: space-between;"></div>
+                <div class="card-body" style="display: flex; flex-direction: column;">
+                    <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                        <p style="font-size: larger;">{{ book.title }}</p>
+                    </h5>
+                    <p class="card-text" style="font-size: 14px;">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                </div>
+                <div style="align-self: flex-end;margin:10px">
+                    <a href="{% url 'main:book_review' book.pk %}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+                </div>
+            </div>
+        {% endfor %}
     </div>
+    
+
     <!-- Kalo gk pake search data bukunya dari all -->
     {% if not from_search %}
         <a href="{% url 'main:show_main_page' page_num|add:"-1"  %}">
