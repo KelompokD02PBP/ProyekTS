@@ -12,7 +12,7 @@ import re
 # USER GAK BOLEH AKSES
 def make_book_dataframe(request):
     source= os.path.join(BASE_DIR, 'datasets\\Books.csv')
-    print("all (71692) books test:")
+    print("all books test:")
 
     tm = time.time()
 
@@ -103,7 +103,9 @@ def search_book2(book):
 
 def get_books(request):
     books = Book.objects.all()
+    res_list = []
+    
     for b in books:
-        print(b)
+        res_list.append(str(b))
 
-    return HttpResponse("OK")
+    return HttpResponse("\n".join(res_list), content_type="text/plain")
