@@ -99,6 +99,11 @@ def search_book2(book):
     
     print(f"search took {time.time() - tm} seconds")
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    # for x in books:
+    #     print(x.pk, end=" ")
+>>>>>>> 1ca028f85e783cc9ba3fdce278e35646bf4c2417
 =======
     # for x in books:
     #     print(x.pk, end=" ")
