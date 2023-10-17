@@ -165,6 +165,7 @@ def book_review(request, id):
         context['id'] = request.user.pk
     return render(request, 'book.html', context)
 
+# Function untuk menambahakan like
 @csrf_exempt
 def add_like_ajax(request):
     # print("in add_like_ajax views.py")
@@ -188,6 +189,7 @@ def add_like_ajax(request):
         return HttpResponse(b"LIKED", status=201)
     return HttpResponseNotFound()
 
+#Function untuk mendapatkan daftar siapa saja yang pernah like bukunya
 @csrf_exempt
 def see_like_ajax(request):
     # print("in add_like_ajax views.py")
@@ -201,20 +203,14 @@ def see_like_ajax(request):
         return HttpResponse(serializers.serialize('json',likes))
     return HttpResponseNotFound()
 
+#Function untuk mengetahui apakah user dalam kondisi like atau tidak terhadap buku
 @csrf_exempt
 def like_dislike_ajax(request):
-    print("in like_dislike views.py")
+    # print("in like_dislike views.py")
     if request.method == 'POST':
         id = request.POST.get("id")
         book = Book.objects.get(pk=id)
-        # print("book in like_dislike",book)
         likes = Like.objects.filter(book=book, user = request.user)
-        # print(len(likes))
-        # if len(likes)==1:
-            # print("like")
-            # print(likes)
-        # else:
-            # print("dislike")
-            # print(likes)
+
         return HttpResponse(serializers.serialize('json',likes))
     return HttpResponseNotFound()

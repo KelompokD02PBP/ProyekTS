@@ -13,6 +13,10 @@
     </table>
 
     <script>
+        /*
+        Pas pertama kali window load, cek apakah user pernah like bukunya
+        Setelah itu build html yg isinya semua orang yg pernah like
+        */
         window.onload = function(){
             const form = new FormData()
             form.append("id", {{book.pk}})
@@ -24,12 +28,16 @@
             }).then((like_or_dislike) => like_or_dislike.json()).then((res) => did_like(res)).then((data) => build_like({{book.pk}}))
         }
 
+        /*
+        Function yang berguna untuk menambahkan like ke buku lalu merubah isi tabel user
+        yang pernah like bukunya
+        menerima parameter id buku
+        */
         // ID user
         async function like(id){
             const formData = new FormData()
             formData.append("id", id)
 
-            //Like atau dislike?
             const form = new FormData()
             form.append("id", id)
             
@@ -42,6 +50,11 @@
             })).then((like_or_dislike) => like_or_dislike.json()).then((res) => did_like(res)).then((data) => build_like({{book.pk}}))
         }
 
+        /*
+        Function untuk mengubah tabel berisi user yang pernah like
+        digunakan untuk DEBUGGING. jika ingin di-comment out silahkan saja
+        Menerima id buku
+        */
         async function build_like(id){
             var likes = await see_like(id)
             res = `<tr>
@@ -58,16 +71,19 @@
             document.getElementById('likedBy').innerHTML =res
         }
 
-        
+        /*
+        Function yang cek apakah user pernah like bukunya
+        Menerima parameter json yang berisi 1 atau 0 like milik request.user terhadap buku
+        */
         function did_like(like_or_dislike){
             var like_or_dislike = like_or_dislike
             var length_temp=0
-            console.log("did_like "+ like_or_dislike)
+            // console.log("did_like "+ like_or_dislike)
             like_or_dislike.forEach((lod)=>{
                 length_temp+=1
             })
 
-            console.log(length_temp)
+            // console.log(length_temp)
 
             if(length_temp==1){
                 document.getElementById('like').style.color = "blue";
@@ -77,7 +93,11 @@
             }
         }
 
-        //id buku
+        /*
+        Function ini untuk MENDAPATKAN siapa saja yang like buku ini.
+        digunakan untuk debugging, sehingga jika ingin di comment out silahkan
+        menerima parameter id buku.
+        */
         async function see_like(bookId){
             const formData= new FormData()
             formData.append("id", bookId)
