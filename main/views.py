@@ -51,7 +51,6 @@ def show_main_search(request, page_num):
     global last_searched
     context = {}
 
-    # MASIH ERROR DI BAGIAN RE-SEARCH
     to_find = request.GET.get("search_bar")
     print("last_searched:",last_searched)
         
@@ -60,12 +59,12 @@ def show_main_search(request, page_num):
         context['page_num'] = page_num
         context['from_search']=True
         
-        # yang dicari beda lagi, kosongin list sebelumnya
-        # to_find!=None buat pastiin bukan gr gr refresh/nextpage
-
+        #search string kosong
         if to_find!=None and len(to_find)==0:
             return HttpResponseRedirect(reverse("main:show_main_page", kwargs={'page_num':1}))
 
+        # yang dicari beda lagi, kosongin list sebelumnya
+        # to_find!=None buat pastiin bukan gr gr refresh/nextpage
         if to_find!=None and last_searched!=to_find:
             books_last_searched=[]
             last_searched=""
@@ -75,7 +74,6 @@ def show_main_search(request, page_num):
             books = search_katalog(to_find, page_num)
             context['books'] = books
 
-            request.session.modified=True
         # ganti page
         else:
             books = search_katalog("", page_num)
@@ -175,14 +173,14 @@ def add_like_ajax(request):
         book = Book.objects.get(pk=id)
 
         has_like = Like.objects.filter(book = book, user = request.user)
-        print("has like =",has_like)
+        # print("has like =",has_like)
 
-        print("anjing", book, request.user)
+        # print("anjing", book, request.user)
         if len(has_like)==0:
             like = Like(user = request.user,
                         book = book
                         )
-            print("like",like)
+            # print("like",like)
             like.save()
         else:
             has_like.delete()
@@ -192,10 +190,10 @@ def add_like_ajax(request):
 
 @csrf_exempt
 def see_like_ajax(request):
-    print("in add_like_ajax views.py")
+    # print("in add_like_ajax views.py")
     if request.method == 'POST':
         id = request.POST.get("id")
-        print("id",id)
+        # print("id",id)
         book = Book.objects.get(pk=id)
         likes = Like.objects.filter(book=book)
         # print("likes", type(likes))
@@ -209,14 +207,14 @@ def like_dislike_ajax(request):
     if request.method == 'POST':
         id = request.POST.get("id")
         book = Book.objects.get(pk=id)
-        print("book in like_dislike",book)
+        # print("book in like_dislike",book)
         likes = Like.objects.filter(book=book, user = request.user)
-        print(len(likes))
-        if len(likes)==1:
-            print("like")
-            print(likes)
-        else:
-            print("dislike")
-            print(likes)
+        # print(len(likes))
+        # if len(likes)==1:
+            # print("like")
+            # print(likes)
+        # else:
+            # print("dislike")
+            # print(likes)
         return HttpResponse(serializers.serialize('json',likes))
     return HttpResponseNotFound()

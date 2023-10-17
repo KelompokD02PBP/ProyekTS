@@ -98,8 +98,6 @@ def search_book2(book):
     books = Book.objects.filter(title__istartswith=book)| Book.objects.filter(title__iendswith=book) | Book.objects.filter(title__icontains=book)
     
     print(f"search took {time.time() - tm} seconds")
-    for x in books:
-        print(x.pk)
     
     return books
 
