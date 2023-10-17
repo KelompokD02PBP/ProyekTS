@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <body>
     <p>ISBN: {{book.isbn}}</p>
     <h2>{{book.title}}</h2>
     <img src={{book.image_url_m}} alt={{book.title}}>
@@ -8,18 +9,82 @@
     <p>Published in {{book.year_of_publish}}</p>
 
     <button id="like" onclick="like({{book.pk}})">Like</button>
+    <table id ="likedBy">
+    </table>
 
     <script>
+        window.onload = function(){
+            const form = new FormData()
+            form.append("id", {{book.pk}})
+            console.log({{book.pk}})
+
+            fetch("{% url 'main:like_dislike' %}",{
+                method : "POST",
+                body : form
+            }).then((like_or_dislike) => like_or_dislike.json()).then((res) => did_like(res)).then((data) => build_like({{book.pk}}))
+        }
+
+        // ID user
         async function like(id){
             const formData = new FormData()
             formData.append("id", id)
+
+            //Like atau dislike?
+            const form = new FormData()
+            form.append("id", id)
             
             fetch("{% url 'main:add_like_ajax' %}", {
                 method: "POST",
                 body: formData
+            }).then(data => fetch("{% url 'main:like_dislike' %}",{
+                method : "POST",
+                body : form
+            })).then((like_or_dislike) => like_or_dislike.json()).then((res) => did_like(res)).then((data) => build_like({{book.pk}}))
+        }
+
+        async function build_like(id){
+            var likes = await see_like(id)
+            res = `<tr>
+                <th>by</th>
+                <th>book</th>
+                </tr>`
+            console.log("likes "+ likes)
+            likes.forEach((l)=>{
+                res+=`\n<tr>
+                    <td>${l.fields.user}</td>
+                    <td>${l.fields.book}</td>
+                </tr>` 
             })
-            console.log("clicked")
-            document.getElementById('like').style.color = "blue";
+            document.getElementById('likedBy').innerHTML =res
+        }
+
+        
+        function did_like(like_or_dislike){
+            var like_or_dislike = like_or_dislike
+            var length_temp=0
+            console.log("did_like "+ like_or_dislike)
+            like_or_dislike.forEach((lod)=>{
+                length_temp+=1
+            })
+
+            console.log(length_temp)
+
+            if(length_temp==1){
+                document.getElementById('like').style.color = "blue";
+            }
+            else{
+                document.getElementById('like').style.color = "black";
+            }
+        }
+
+        //id buku
+        async function see_like(bookId){
+            const formData= new FormData()
+            formData.append("id", bookId)
+            return fetch("{% url 'main:see_like_ajax' %}", {
+                method: "POST",
+                body: formData
+            }).then((res) => res.json())
         }
     </script>
 {%endblock%}

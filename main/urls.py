@@ -10,6 +10,8 @@ urlpatterns = [
     path('register/', register, name="register"),
     path('login/', login_user, name="login"),
     path('logout/', logout_user, name="logout"),
-    path('book/<int:id>', book_review , name="book_review"),
-    path('add-like', add_like_ajax , name="add_like_ajax"),
+    path('book/<int:id>/', book_review , name="book_review"),
+    path('add-like/', add_like_ajax , name="add_like_ajax"),
+    path('see-like/', see_like_ajax , name="see_like_ajax"),
+    path('like-dislike/', like_dislike_ajax , name="like_dislike"),
 ]
