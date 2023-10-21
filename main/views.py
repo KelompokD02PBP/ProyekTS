@@ -7,9 +7,11 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseNotFound
 from django.urls import reverse
 
-from katalog.models import Book, AppUser
+from katalog.models import Book
 from katalog.views import search_book2
-from .models import Like
+from .models import Like, ProfileUser
+
+from .forms import ProfileUserForm
 
 from django.core import serializers
 
@@ -82,16 +84,21 @@ def show_main_search(request, page_num):
     return render(request, "main.html", context)
 
 def register(request):
-    form = UserCreationForm()
+    user_form = UserCreationForm()
+    profile_form = ProfileUserForm()
 
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
+        user_form = UserCreationForm(request.POST)
+        profile_form = ProfileUserForm(request.POST or None, request.FILES or None)
+        if user_form.is_valid() and profile_form.is_valid():
+            user = user_form.save()
+            profile = profile_form.save(commit=False)
+            profile.user=user
+            profile.save()
             messages.success(request, 'Your account has been successfully created!')
             return redirect('main:login')
     
-    context = {'form':form}
+    context = {'user_form':user_form, 'profile_form':profile_form}
     return render(request, 'register.html', context)
 
 def login_user(request):
@@ -164,6 +171,17 @@ def book_review(request, id):
         context['name'] = request.user.username
         context['id'] = request.user.pk
     return render(request, 'book.html', context)
+
+# Method buat buka profile page
+def show_self_profile(request):
+    print("in show_self_profile")
+    profile = ProfileUser.objects.filter(user=request.user)
+    books_you_like = Like.objects.filter(user=request.user)
+    context = {"profile":profile}
+    context['name']=request.user.username
+    context['books_you_like']=books_you_like
+    
+    return render(request, "profile.html", context)
 
 # Function untuk menambahakan like
 @csrf_exempt
