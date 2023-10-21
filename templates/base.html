@@ -38,7 +38,7 @@
                 </div>
                 <span class="navbar-text" style="margin-right: 5px;">
                     {% if name %}
-                        Hello, {{name}}!
+                        <a href="{% url 'main:profile' %}">Hello, {{name}}!</a>
                     {% else %}
                         Hello user, please log in.
                     {% endif%}
