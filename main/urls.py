@@ -16,4 +16,6 @@ urlpatterns = [
     path('add-like/', add_like_ajax , name="add_like_ajax"),
     path('see-like/', see_like_ajax , name="see_like_ajax"),
     path('like-dislike/', like_dislike_ajax , name="like_dislike"),
+    path('update-profile/',update_profile , name="update_profile"),
+    path('get-username/',get_username , name="get_username"),
 ]

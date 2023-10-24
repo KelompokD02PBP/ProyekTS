@@ -19,6 +19,8 @@ from django.contrib.auth.models import User
 
 from django.views.decorators.csrf import csrf_exempt
 
+from re import match
+
 def show_main(request):
     context = {}
     
@@ -232,3 +234,48 @@ def like_dislike_ajax(request):
 
         return HttpResponse(serializers.serialize('json',likes))
     return HttpResponseNotFound()
+
+@csrf_exempt
+def update_profile(request):
+    print("in update_profile")
+    if request.method == 'POST':
+        username = request.POST.get("Username")
+        already_exist = User.objects.filter(username=username)
+
+        address = request.POST.get("Address")
+        email = request.POST.get("Email")
+        image = request.FILES.get("profile_picture")
+        print("img/",image)
+        user_id = request.POST.get("id")
+
+        user = User.objects.get(pk=user_id)
+        profile = ProfileUser.objects.filter(user=user)
+        profile_list = list(profile)
+        
+        #Jika username taken
+        if(len(already_exist)!=0):
+            messages.info(request, 'Sorry, username taken')
+            return HttpResponse(serializers.serialize('json',profile))
+        
+        #Jika bukan email
+        if(not match(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$',email)):
+            messages.info(request, 'Invalid email')
+            return HttpResponse(serializers.serialize('json',profile))
+        
+        profile_list[0].address=address
+        profile_list[0].email=email
+        profile_list[0].profile_picture=image
+        user.username=username
+        user.save()
+        profile_list[0].save()
+
+        print(profile_list[0])
+        return HttpResponse(serializers.serialize('json',profile_list))
+    return HttpResponseNotFound()
+
+@csrf_exempt
+def get_username(request):
+    id = request.POST.get("id")
+    print("id in getusername",id)
+    user = User.objects.filter(pk=id)
+    return HttpResponse(serializers.serialize('json',user))
