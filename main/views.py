@@ -124,6 +124,15 @@ def get_katalog(page_num):
         
     return result
 
+def get_liked_books(user) :
+    likes = []
+    if user:
+        # Mengambil book yang telah dilike oleh user
+        liked_books = Like.objects.filter(user = user).order_by('-timestamp')
+        for like in liked_books: likes.append(like.book)
+    
+    return likes
+
 '''
 membuat daftar yang dicari
 '''
