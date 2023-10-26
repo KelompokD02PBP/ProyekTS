@@ -26,16 +26,20 @@ def show_main(request):
 
         if request.user.id !=None: #Kalo udh login bisa liat halaman
             context['page_num']=1
-            context['books']=get_katalog(1)
+            context['books']=get_katalog(1,order_by=request.GET.get('order_by'))
 
     return render(request, "main.html", context)
+
+
 
 def show_main_page(request, page_num):
     context = {}
     
     if request.user:
         context['name'] = request.user.username
-        context['books'] = get_katalog(page_num)
+        if(page_num<=0):
+            page_num=1
+        context['books']=get_katalog(page_num, order_by=request.GET.get('order_by'))
         context['page_num'] = page_num
 
     return render(request, "main.html", context)
@@ -50,37 +54,43 @@ def show_main_search(request, page_num):
     global books_last_searched
     global last_searched
     context = {}
-
-    # MASIH ERROR DI BAGIAN RE-SEARCH
+    order_by  = request.GET.get('order_by')
     to_find = request.GET.get("search_bar")
     print("last_searched:",last_searched)
         
     if request.user:
         context['name'] = request.user.username
+        if(page_num<=0):
+            page_num=1
         context['page_num'] = page_num
         context['from_search']=True
         
-        # yang dicari beda lagi, kosongin list sebelumnya
-        # to_find!=None buat pastiin bukan gr gr refresh/nextpage
-
-        if to_find!=None and len(to_find)==0:
+        #search string kosong
+        if to_find!=None and len(to_find)==0 and last_sort_by==order_by:
             return HttpResponseRedirect(reverse("main:show_main_page", kwargs={'page_num':1}))
 
+        # yang dicari beda lagi, kosongin list sebelumnya
+        # to_find!=None buat pastiin bukan gr gr refresh/nextpage
         if to_find!=None and last_searched!=to_find:
             books_last_searched=[]
             last_searched=""
         
+        
         # kalo blm pernah search atau search hal baru
         if len(books_last_searched)==0:
-            books = search_katalog(to_find, page_num)
+            books = search_katalog(to_find, page_num,order_by=request.GET.get('order_by'))
             context['books'] = books
 
-            request.session.modified=True
         # ganti page
         else:
-            books = search_katalog("", page_num)
-            context['books'] = books
+            books = search_katalog(last_searched, page_num,order_by=request.GET.get('order_by'))
 
+            #Next page tapi udh habis
+            if(len(books)==0):
+                books = search_katalog(last_searched, page_num-1,order_by=request.GET.get('order_by'))
+                context['page_num']=page_num-1
+            context['books'] = books
+    #   
     return render(request, "main.html", context)
 
 def register(request):
@@ -118,30 +128,46 @@ def logout_user(request):
     response.delete_cookie('last_login')
     return response
 
-def get_katalog(page_num):
+
+def get_katalog(page_num,order_by):
     result=[]
-    books = Book.objects.all()
-    for i in range (page_num*50-50, page_num*50):
+    print(order_by)
+    if order_by == 'asc' or order_by==None:
+        books = Book.objects.all().order_by("title")
+    else:
+        books = Book.objects.all().order_by("-title")
+    
+    i=page_num*20-20
+    while(i<page_num*20 and i<len(books)):
         result+=[books[i]]
-        
+        i+=1
+
     return result
+
 
 '''
 membuat daftar yang dicari
 '''
-def search_katalog(to_find ,page_num):
+last_sort_by = ""
+def search_katalog(to_find ,page_num,order_by):
     global books_last_searched
     global last_searched
-    
+    global last_sort_by
     # search hal baru
-    if len(books_last_searched)==0:
+    if len(books_last_searched)==0 or order_by!=last_sort_by:
         result=[]
-        books = list(search_book2(to_find))
-        i=page_num*50-50
+        
+        if order_by=='asc' or order_by == None:
+            books = list(search_book2(to_find).order_by("title"))
+        else:
+            books = list(search_book2(to_find).order_by("-title"))
+            
+        i=page_num*20-20
 
         books_last_searched = books
         last_searched = to_find
-        while(i<len(books) and i<page_num*50):
+        last_sort_by = order_by
+        while(i<len(books) and i<page_num*20):
             result.append(books[i])
             i+=1
 
@@ -149,13 +175,15 @@ def search_katalog(to_find ,page_num):
     else:
         result=[]
         books = books_last_searched
-        i=page_num*50-50
+        
+        i=page_num*20-20
 
-        while(i<len(books) and i<page_num*50):
+        while(i<len(books) and i<page_num*20):
             result.append(books[i])
             i+=1
 
     return result
+
 
 # Ke page per buku
 def book_review(request, id):

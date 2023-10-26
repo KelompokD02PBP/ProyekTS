@@ -1,32 +1,57 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <h2> Hello world! </h2>
 
-{% if messages %}  
-    <ul>   
-        {% for message in messages %}  
-            <li>{{ message }}</li>  
-            {% endfor %}  
+{% if messages %}
+    <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
     </ul>
 {% endif %}
 
-
 {% if page_num != -1 %}
+    {% if from_search %}
+        <a href="{% url 'main:show_main_page' 1 %}">
+            <button>Home</button>
+        </a>
+    {% else %}
+        <form name="search_bar" method="GET" action="{% url 'main:show_main_search' 1 %}">
+            <label for="search_bar">Search</label>
+            <input type="text" id="search_bar" name="search_bar"><br><br>
+            <input type="submit">
+        </form>
+        <hr>
+        {% if page_num == 1 %}
+            <a href="{% url 'main:show_main_page' 1 %}?order_by=asc">
+                <button>Sort A-Z</button>
+            </a>
+            <a href="{% url 'main:show_main_page' 1 %}?order_by=desc">
+                <button>Sort Z-A</button>
+            </a>
+        {% else %}
+            <a href="{% url 'main:show_main_page' 1 %}?order_by={{ request.GET.order_by }}">
+                <button>Home</button>
+            </a>
+        {% endif %}
+    {% endif %}
 
-    <form name="search_bar" method ="GET" action="{% url 'main:show_main_search' 1 %}">
-        <label for="search_bar">Search</label>
-        <input type="text" id="search_bar" name="search_bar"><br><br>
-        <input type="submit">
-    </form>
-    <hr>
+    {% if from_search %}
+        <a href="{% url 'main:show_main_search' 1 %}?order_by=asc">
+            <button>Sort A-Z</button>
+        </a>
+        <a href="{% url 'main:show_main_search' 1 %}?order_by=desc">
+            <button>Sort Z-A</button>
+        </a>
+    {% endif %}
 
     <div id="katalog" style="display: flex; flex-wrap: wrap;">
         {% for book in books %}
             <div class="card" style="width: 18rem; margin: 10px;">
                 <div style="height: 250px;display: flex; justify-content: center;">
                     <img class="card-img-top" src="{{ book.image_url_l }}" alt="Card image cap" style="height: 250px; object-fit: cover;">
-                    
-                </div> 
+                </div>
                 <div class="container-card" style="display: flex;justify-content: space-between;"></div>
                 <div class="card-body" style="display: flex; flex-direction: column;">
                     <h5 class="card-title" style="font-size: 16px; margin: 0;">
@@ -40,25 +65,24 @@
             </div>
         {% endfor %}
     </div>
-    
 
-    <!-- Kalo gk pake search data bukunya dari all -->
     {% if not from_search %}
-        <a href="{% url 'main:show_main_page' page_num|add:"-1"  %}">
+        <a href="{% url 'main:show_main_page' page_num|add:"-1" %}?order_by={{ request.GET.order_by }}">
             <button>PrevPage</button>
         </a>
-        <a href="{% url 'main:show_main_page' page_num|add:"+1"  %}">
+        <a href="{% url 'main:show_main_page' page_num|add:"+1" %}?order_by={{ request.GET.order_by }}">
             <button>NextPage</button>
         </a>
     {% endif %}
-    <!-- Kalo pake search data bukunya dari hasil filter -->
+
     {% if from_search %}
-            <a href="{% url 'main:show_main_search' page_num|add:"-1"%}">
-                <button>PrevPage</button>
-            </a>
-            <a href="{% url 'main:show_main_search' page_num|add:"+1"%}">
-                <button>NextPage</button>
-            </a>
+        <a href="{% url 'main:show_main_search' page_num|add:"-1" %}?order_by={{ request.GET.order_by }}">
+            <button>PrevPageSearch</button>
+        </a>
+        <a href="{% url 'main:show_main_search' page_num|add:"+1" %}?order_by={{ request.GET.order_by }}">
+            <button>NextPageSearch</button>
+        </a>
     {% endif %}
 {% endif %}
+
 {% endblock content %}
