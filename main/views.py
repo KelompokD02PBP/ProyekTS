@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseNotFound
 from django.urls import reverse
-
+from django.contrib.auth.decorators import login_required
 from katalog.models import Book, AppUser
 from katalog.views import search_book2
 from .models import Like
@@ -17,6 +17,7 @@ from django.contrib.auth.models import User
 
 from django.views.decorators.csrf import csrf_exempt
 
+@login_required(login_url='/login')
 def show_main(request):
     context = {}
     
@@ -134,9 +135,16 @@ def get_katalog(page_num,order_by):
     print(order_by)
     if order_by == 'asc' or order_by==None:
         books = Book.objects.all().order_by("title")
-    else:
+    elif order_by =='desc':
         books = Book.objects.all().order_by("-title")
-    
+    elif order_by == "year_asc":
+        books = Book.objects.all().order_by("year_of_publish")
+    elif order_by == "year_desc":
+        books = Book.objects.all().order_by("-year_of_publish")
+    elif order_by == "atas_2000":
+        books = Book.objects.filter(year_of_publish__gte=2000)
+    elif order_by == "bawah_2000":
+        books = Book.objects.filter(year_of_publish__lt=2000)
     i=page_num*20-20
     while(i<page_num*20 and i<len(books)):
         result+=[books[i]]
@@ -248,3 +256,8 @@ def like_dislike_ajax(request):
             print(likes)
         return HttpResponse(serializers.serialize('json',likes))
     return HttpResponseNotFound()
+
+@csrf_exempt
+def sort_books_ajax(request,page_num,order_by):
+    sorted_books = get_katalog(page_num,order_by)
+    return HttpResponse(serializers.serialize('json',sorted_books))

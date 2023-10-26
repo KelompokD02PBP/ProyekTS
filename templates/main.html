@@ -24,12 +24,19 @@
         </form>
         <hr>
         {% if page_num == 1 %}
-            <a href="{% url 'main:show_main_page' 1 %}?order_by=asc">
-                <button>Sort A-Z</button>
-            </a>
-            <a href="{% url 'main:show_main_page' 1 %}?order_by=desc">
-                <button>Sort Z-A</button>
-            </a>
+        <div class="dropdown" style="margin-bottom: 10px;text-align: right;">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Sort & Filter
+            </button>
+            <div class="dropdown-menu" style="text-align: center;" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" onclick="sortBooks( '1','asc')" href="#">Sort A-Z</a>
+              <a class="dropdown-item" onclick="sortBooks( '1','desc')"href="#">Sort Z-A</a>
+              <a class="dropdown-item" onclick="sortBooks( '1','year_asc')"href="#">Sort Year Asc</a>
+              <a class="dropdown-item" onclick="sortBooks( '1','year_desc')"href="#">Sort Year Desc</a>
+              <a class="dropdown-item" onclick="sortBooks( '1','atas_2000')"href="#">Filter 2000 and Up</a>
+              <a class="dropdown-item" onclick="sortBooks( '1','bawah_2000')"href="#">Filter Before 2000</a>
+            </div>
+          </div>
         {% else %}
             <a href="{% url 'main:show_main_page' 1 %}?order_by={{ request.GET.order_by }}">
                 <button>Home</button>
@@ -38,16 +45,26 @@
     {% endif %}
 
     {% if from_search %}
-        <a href="{% url 'main:show_main_search' 1 %}?order_by=asc">
-            <button>Sort A-Z</button>
-        </a>
-        <a href="{% url 'main:show_main_search' 1 %}?order_by=desc">
-            <button>Sort Z-A</button>
-        </a>
+    {% if page_num == 1 %}
+    <div class="dropdown" style="margin-bottom: 10px;text-align: right;">
+        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Sort & Filter
+        </button>
+        <div class="dropdown-menu" style="text-align: center;" aria-labelledby="dropdownMenuButton">
+          <a class="dropdown-item" onclick="sortBooks( '1','asc')" href="#">Sort A-Z</a>
+          <a class="dropdown-item" onclick="sortBooks( '1','desc')"href="#">Sort Z-A</a>
+          <a class="dropdown-item" onclick="sortBooks( '1','year_asc')"href="#">Sort Year Asc</a>
+          <a class="dropdown-item" onclick="sortBooks( '1','year_desc')"href="#">Sort Year Desc</a>
+          <a class="dropdown-item" onclick="sortBooks( '1','atas_2000')"href="#">Filter 2000 and Up</a>
+          <a class="dropdown-item" onclick="sortBooks( '1','bawah_2000')"href="#">Filter Before 2000</a>
+        </div>
+      </div>
+    {%endif%}
     {% endif %}
 
     <div id="katalog" style="display: flex; flex-wrap: wrap;">
-        {% for book in books %}
+        {%if books%}
+            {% for book in books %}
             <div class="card" style="width: 18rem; margin: 10px;">
                 <div style="height: 250px;display: flex; justify-content: center;">
                     <img class="card-img-top" src="{{ book.image_url_l }}" alt="Card image cap" style="height: 250px; object-fit: cover;">
@@ -57,32 +74,122 @@
                     <h5 class="card-title" style="font-size: 16px; margin: 0;">
                         <p style="font-size: larger;">{{ book.title }}</p>
                     </h5>
-                    <p class="card-text" style="font-size: 14px;">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    <p class="card-text" style="font-size: 16px;">Published {{book.year_of_publish}}</p>
+                    <p class="card-text" style="font-size: 16px;">by {{book.publisher}}</p>
                 </div>
                 <div style="align-self: flex-end;margin:10px">
                     <a href="{% url 'main:book_review' book.pk %}" class="btn btn-primary" style="font-size: 16px;">See More</a>
                 </div>
             </div>
-        {% endfor %}
+            {% endfor %}
+        {%else%}
+            <h4 style="margin-top: 20px;margin-bottom: 20px;">There are no book Left...</h4>
+        {% endif %}
     </div>
 
     {% if not from_search %}
-        <a href="{% url 'main:show_main_page' page_num|add:"-1" %}?order_by={{ request.GET.order_by }}">
-            <button>PrevPage</button>
-        </a>
-        <a href="{% url 'main:show_main_page' page_num|add:"+1" %}?order_by={{ request.GET.order_by }}">
-            <button>NextPage</button>
-        </a>
-    {% endif %}
-
-    {% if from_search %}
-        <a href="{% url 'main:show_main_search' page_num|add:"-1" %}?order_by={{ request.GET.order_by }}">
-            <button>PrevPageSearch</button>
-        </a>
-        <a href="{% url 'main:show_main_search' page_num|add:"+1" %}?order_by={{ request.GET.order_by }}">
-            <button>NextPageSearch</button>
-        </a>
-    {% endif %}
+    
+    <a  id="prevPageLink" href="{% url 'main:show_main_page' page_num|add:"-1" %}?order_by={{ request.GET.order_by|default:"asc" }}">
+        <button>PrevPage</button>
+    </a>
+    <a id="nextPageLink" href="{% url 'main:show_main_page' page_num|add:"1" %}?order_by={{ request.GET.order_by|default:"asc" }}">
+        <button>NextPage</button>
+    </a
+    
 {% endif %}
+
+{% if from_search %}
+    <a href="{% url 'main:show_main_search' page_num|add:"-1" %}?order_by={{ order_by }}">
+        <button>PrevPageSearch</button>
+    </a>
+    <a href="{% url 'main:show_main_search' page_num|add:"+1" %}?order_by={{ order_by }}">
+        <button>NextPageSearch</button>
+    </a>
+{% endif %}
+{% endif %}
+<script>
+    async function getBooks(page_num,orderBy) {
+        console.log(page_num)
+        console.log(orderBy)
+        return fetch(`/sort_books/${page_num}/${orderBy}`).then((res) => res.json());   
+    }
+
+    async function sortBooks(page_num,orderBy) {
+        const sortedBooks = await getBooks(page_num,orderBy);
+        document.getElementById("katalog").innerHTML = "";
+        let htmlString = "";
+        console.log(sortedBooks);
+        sortedBooks.forEach((book) => {
+            htmlString += `
+            <div class="card" style="width: 18rem; margin: 10px;">
+                <div style="height: 250px;display: flex; justify-content: center;">
+                    <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover;">
+                </div>
+                <div class="card-body" style="display: flex; flex-direction: column;">
+                    <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                        <p style="font-size: larger;">${book.fields.title}</p>
+
+                    </h5>
+                    <p class="card-text" style="font-size: 14px;">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                </div>
+                <div style="align-self: flex-end;margin:10px">
+                    <a href="/book/${book.pk}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+                </div>
+            </div>`;
+        });
+        handleOrder(orderBy);
+        document.getElementById("katalog").innerHTML = htmlString;
+    }
+
+    async function handleOrder(orderBy){
+        const prevPageLink = document.getElementById('prevPageLink');
+        const nextPageLink = document.getElementById('nextPageLink');
+        
+        prevPageLink.href = `{% url 'main:show_main_page' page_num|add:"-1" %}?order_by=${orderBy}`;
+        conso
+        nextPageLink.href = `{% url 'main:show_main_page' page_num|add:"1" %}?order_by=${orderBy}`;
+    }
+
+
+    async function sortBooksSearch(page_num,orderBy) {
+        const sortedBooks = await getBooks(page_num,orderBy);
+        document.getElementById("katalog").innerHTML = "";
+        let htmlString = "";
+        console.log(sortedBooks);
+        sortedBooks.forEach((book) => {
+            htmlString += `
+            <div class="card" style="width: 18rem; margin: 10px;">
+                <div style="height: 250px;display: flex; justify-content: center;">
+                    <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover;">
+                </div>
+                <div class="card-body" style="display: flex; flex-direction: column;">
+                    <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                        <p style="font-size: larger;">${book.fields.title}</p>
+
+                    </h5>
+                    <p class="card-text" style="font-size: 14px;">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                </div>
+                <div style="align-self: flex-end;margin:10px">
+                    <a href="/book/${book.pk}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+                </div>
+            </div>`;
+        });
+        handleOrder(orderBy);
+        document.getElementById("katalog").innerHTML = htmlString;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
 
 {% endblock content %}
