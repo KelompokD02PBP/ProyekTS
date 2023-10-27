@@ -96,23 +96,19 @@
     </div>
 
     {% if not from_search %}
-    <a id="prevPageLink" href="{% url 'main:show_main_page' page_num|add:" -1" %}?order_by={{
-        request.GET.order_by|default:"asc" }}">
+    <a id="prevPageLink" href="{% url 'main:show_main_page' page_num|add:" -1" %}?order_by={{request.GET.order_by|default:"asc" }}">
         <button>PrevPage</button>
     </a>
-    <a id="nextPageLink" href="{% url 'main:show_main_page' page_num|add:" 1" %}?order_by={{
-        request.GET.order_by|default:"asc" }}">
+    <a id="nextPageLink" href="{% url 'main:show_main_page' page_num|add:" 1" %}?order_by={{request.GET.order_by|default:"asc" }}">
         <button>NextPage</button>
     </a>
     {% endif %}
 
     {% if from_search %}
-    <a id="prevPageLink" href="{% url 'main:show_main_search' page_num|add:" -1" %}?order_by={{
-        request.GET.order_by|default:"asc" }}">
+    <a id="prevPageLink" href="{% url 'main:show_main_search' page_num|add:" -1" %}?order_by={{request.GET.order_by|default:"asc" }}">
         <button>PrevPageSearch</button>
     </a>
-    <a id="nextPageLink" href="{% url 'main:show_main_search' page_num|add:" 1" %}?order_by={{
-        request.GET.order_by|default:"asc" }}">
+    <a id="nextPageLink" href="{% url 'main:show_main_search' page_num|add:" 1" %}?order_by={{request.GET.order_by|default:"asc" }}">
         <button>NextPageSearch</button>
     </a>
     {% endif %}
