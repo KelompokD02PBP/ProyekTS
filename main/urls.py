@@ -14,7 +14,7 @@ urlpatterns = [
     path('add-like/', add_like_ajax , name="add_like_ajax"),
     path('see-like/', see_like_ajax , name="see_like_ajax"),
     path('like-dislike/', like_dislike_ajax , name="like_dislike"), 
-    path('sort_books/<int:page_num>/<str:order_by>/',sort_books_ajax,name="sort_books"),
     path('sort_books_search/<int:page_num>/<str:order_by>/',sort_books_ajax_search,name="sort_books_search"),
+    path('ajax/<int:page_num>/',sort_main_ajax,name="sort_main_ajax"),
     
 ]

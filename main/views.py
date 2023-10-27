@@ -31,6 +31,7 @@ def show_main(request):
 
     return render(request, "main.html", context)
 
+
 def show_main_page(request, page_num):
     context = {}
     order_by=""
@@ -305,3 +306,30 @@ def sort_books_ajax(request,page_num,order_by):
 def sort_books_ajax_search(request,page_num,order_by):
     sorted_books = search_katalog(last_searched, page_num,order_by)
     return HttpResponse(serializers.serialize('json',sorted_books))
+
+@csrf_exempt
+def sort_main_ajax(request,page_num):
+    order_by=""
+    if request.method == 'POST':
+        order_by_value = request.POST.get('order_by')
+        if order_by_value == '1':
+            order_by = "asc"
+        elif order_by_value == '2':
+            order_by = "desc"
+        elif order_by_value == '3':
+            order_by = "year_asc"
+        elif order_by_value == '4':
+            order_by = "year_desc"
+        elif order_by_value == '5':
+            order_by = "atas_2000"
+        elif order_by_value == '6':
+            order_by = "bawah_2000"
+        else:
+            order_by = request.GET.get('order_by', 'asc')
+    else:
+        order_by = request.GET.get('order_by', 'asc')
+        
+    sorted_books = get_katalog(page_num,order_by)
+    
+    return HttpResponse(serializers.serialize('json',sorted_books))
+
