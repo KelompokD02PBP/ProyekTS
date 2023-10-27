@@ -30,7 +30,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="profile_picture" class="col-form-label">Profile Picture:</label>
-                                <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*"></input>
+                                <input type="file" class="form-control" id="profile_picture" name="profile_picture"></input>
                                 {% comment %} <input type="text" class="form-control" id="profile_picture" name="profile_picture"></input> {% endcomment %}
                             </div>
                             <div class="mb-3">
@@ -65,8 +65,8 @@
             //console.log(data)
             data.forEach(profile=>{
                 //console.log(profile.fields.email)
-                document.getElementById("email").innerHTML=`${profile.fields.email}`
-                document.getElementById("address").innerHTML=`${profile.fields.address}`
+                document.getElementById("email").innerHTML=`Email : ${profile.fields.email}`
+                document.getElementById("address").innerHTML=`Address : ${profile.fields.address}`
                 document.getElementById("username").innerHTML=`${get_new_username(profile.fields.user)}`
                 if(profile.fields.profile_picture){
                     document.getElementById("profile_picture").src=`../media/${profile.fields.profile_picture}`

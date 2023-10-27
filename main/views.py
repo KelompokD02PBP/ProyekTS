@@ -14,10 +14,14 @@ from .models import Like, ProfileUser
 from .forms import ProfileUserForm
 
 from django.core import serializers
+from django.core.validators import validate_email
 
 from django.contrib.auth.models import User
 
 from django.views.decorators.csrf import csrf_exempt
+
+from PIL import Image
+Image.MAX_IMAGE_PIXELS = 1000000
 
 from re import match
 
@@ -64,12 +68,12 @@ def show_main_search(request, page_num):
         context['from_search']=True
         
         #search string kosong
-        if to_find!=None and len(to_find)==0:
+        if to_find != None and len(to_find) == 0:
             return HttpResponseRedirect(reverse("main:show_main_page", kwargs={'page_num':1}))
 
         # yang dicari beda lagi, kosongin list sebelumnya
-        # to_find!=None buat pastiin bukan gr gr refresh/nextpage
-        if to_find!=None and last_searched!=to_find:
+        # to_find != None buat pastiin bukan gr gr refresh/nextpage
+        if to_find != None and last_searched!=to_find:
             books_last_searched=[]
             last_searched=""
         
@@ -249,19 +253,24 @@ def update_profile(request):
         user_id = request.POST.get("id")
 
         user = User.objects.get(pk=user_id)
-        profile = ProfileUser.objects.filter(user=user)
+        profile = ProfileUser.objects.filter(user=user)[0]
         profile_list = list(profile)
         
-        #Jika username taken
-        if(len(already_exist)!=0):
+        #Jika username taken by another person
+        if(len(already_exist)!=0 and already_exist[0] != profile):
             messages.info(request, 'Sorry, username taken')
             return HttpResponse(serializers.serialize('json',profile))
         
         #Jika bukan email
-        if(not match(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$',email)):
+        try:
+            validate_email(email)
+        except:
             messages.info(request, 'Invalid email')
             return HttpResponse(serializers.serialize('json',profile))
         
+        # check media validity
+        
+
         profile_list[0].address=address
         profile_list[0].email=email
         profile_list[0].profile_picture=image
