@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect, HttpResponse, HttpResponseNotFound
 from django.urls import reverse
 
 from katalog.models import Book
+from django.contrib.auth.decorators import login_required
 from katalog.views import search_book2
 from .models import Like, ProfileUser
 
@@ -30,19 +31,39 @@ def show_main(request):
 
         if request.user.id !=None: #Kalo udh login bisa liat halaman
             context['page_num']=1
-            context['books']=get_katalog(1)
             context['user_id']=request.user.pk
+            context['books']=get_katalog(1,order_by=request.GET.get('order_by'))
 
     return render(request, "main.html", context)
 
+
 def show_main_page(request, page_num):
     context = {}
-    
+    order_by=""
+    if request.method == 'POST':
+        order_by_value = request.POST.get('order_by')
+        if order_by_value == '1':
+            order_by = "asc"
+        elif order_by_value == '2':
+            order_by = "desc"
+        elif order_by_value == '3':
+            order_by = "year_asc"
+        elif order_by_value == '4':
+            order_by = "year_desc"
+        elif order_by_value == '5':
+            order_by = "atas_2000"
+        elif order_by_value == '6':
+            order_by = "bawah_2000"
+        else:
+            order_by = request.GET.get('order_by', 'asc')
+    else:
+        order_by = request.GET.get('order_by', 'asc')
+
     if request.user:
         context['name'] = request.user.username
-        if(page_num<=0):
-            page_num=1
-        context['books'] = get_katalog(page_num)
+        if page_num <= 0:
+            page_num = 1
+        context['books'] = get_katalog(page_num, order_by=order_by)
         context['page_num'] = page_num
         context['user_id']=request.user.pk
 
@@ -55,11 +76,13 @@ Show main jika search
 books_last_searched=[] #simpen search sebelumnya biar bisa next/prior page dengan cepat
 last_searched="" #simpen kata yang di search terakhir
 
+
 def show_main_search(request, page_num):
     global books_last_searched
     global last_searched
     context = {}
 
+    order_by  = request.GET.get('order_by')
     to_find = request.GET.get("search_bar")
     print("last_searched:",last_searched)
         
@@ -71,9 +94,8 @@ def show_main_search(request, page_num):
         context['from_search']=True
         context['user_id']=request.user.pk
 
-        
         #search string kosong
-        if to_find!=None and len(to_find)==0:
+        if to_find!=None and len(to_find)==0 and last_sort_by==order_by:
             return HttpResponseRedirect(reverse("main:show_main_page", kwargs={'page_num':1}))
 
         # yang dicari beda lagi, kosongin list sebelumnya
@@ -82,21 +104,22 @@ def show_main_search(request, page_num):
             books_last_searched=[]
             last_searched=""
         
+        
         # kalo blm pernah search atau search hal baru
         if len(books_last_searched)==0:
-            books = search_katalog(to_find, page_num)
+            books = search_katalog(to_find, page_num,order_by=request.GET.get('order_by'))
             context['books'] = books
 
         # ganti page
         else:
-            books = search_katalog("", page_num)
+            books = search_katalog(last_searched, page_num,order_by=request.GET.get('order_by'))
 
             #Next page tapi udh habis
             if(len(books)==0):
-                books = search_katalog("", page_num-1)
+                books = search_katalog(last_searched, page_num-1,order_by=request.GET.get('order_by'))
                 context['page_num']=page_num-1
             context['books'] = books
-
+    #   
     return render(request, "main.html", context)
 
 def register(request):
@@ -139,10 +162,24 @@ def logout_user(request):
     response.delete_cookie('last_login')
     return response
 
-def get_katalog(page_num):
+
+def get_katalog(page_num,order_by):
     result=[]
     books = Book.objects.all()
     
+    print(order_by)
+    if order_by == 'asc' or order_by==None:
+        books = Book.objects.all().order_by("title")
+    elif order_by =='desc':
+        books = Book.objects.all().order_by("-title")
+    elif order_by == "year_asc":
+        books = Book.objects.all().order_by("year_of_publish")
+    elif order_by == "year_desc":
+        books = Book.objects.all().order_by("-year_of_publish")
+    elif order_by == "atas_2000":
+        books = Book.objects.filter(year_of_publish__gte=2000)
+    elif order_by == "bawah_2000":
+        books = Book.objects.filter(year_of_publish__lt=2000)
     i=page_num*20-20
     while(i<page_num*20 and i<len(books)):
         result+=[books[i]]
@@ -150,22 +187,39 @@ def get_katalog(page_num):
 
     return result
 
+
 '''
 membuat daftar yang dicari
 '''
-def search_katalog(to_find ,page_num):
+last_sort_by = ""
+def search_katalog(to_find ,page_num,order_by):
     global books_last_searched
     global last_searched
-    
+    global last_sort_by
     # search hal baru
-    if len(books_last_searched)==0:
+    if len(books_last_searched)==0 or order_by!=last_sort_by:
         result=[]
         books = list(search_book2(to_find))
         print(type(books))
+        
+        if order_by=='asc' or order_by == None:
+            books = list(search_book2(to_find).order_by("title"))
+        elif order_by=='desc':
+            books = list(search_book2(to_find).order_by("-title"))
+        elif order_by == "year_asc":
+            books = list(search_book2(to_find).order_by("year_of_publish"))
+        elif order_by == "year_desc":
+            books = list(search_book2(to_find).order_by("-year_of_publish"))
+        elif order_by == "atas_2000":
+            books = list(search_book2(to_find).filter(year_of_publish__gte=2000))
+        elif order_by == "bawah_2000":
+            books = list(search_book2(to_find).filter(year_of_publish__lt=2000))
+            
         i=page_num*20-20
 
         books_last_searched = books
         last_searched = to_find
+        last_sort_by = order_by
         while(i<len(books) and i<page_num*20):
             result.append(books[i])
             i+=1
@@ -174,6 +228,7 @@ def search_katalog(to_find ,page_num):
     else:
         result=[]
         books = books_last_searched
+        
         i=page_num*20-20
 
         while(i<len(books) and i<page_num*20):
@@ -181,6 +236,7 @@ def search_katalog(to_find ,page_num):
             i+=1
 
     return result
+
 
 # Ke page per buku
 def book_review(request, id):
@@ -191,18 +247,6 @@ def book_review(request, id):
         context['name'] = request.user.username
         context['user_id'] = request.user.pk
     return render(request, 'book.html', context)
-
-# # Method buat buka self profile page
-# def show_self_profile(request):
-#     print("in show_self_profile")
-#     profile = ProfileUser.objects.filter(user=request.user)
-#     books_you_like = Like.objects.filter(user=request.user)
-#     context = {"profile":profile}
-#     context['name']=request.user.username
-#     context['books_you_like']=books_you_like
-#     context['self_profile']=True
-    
-#     return render(request, "profile.html", context)
 
 # Method buat buka profile page orang lain
 def show_profile(request, user_id):
@@ -314,3 +358,39 @@ def get_username(request):
     print("id in getusername",id)
     user = User.objects.filter(pk=id)
     return HttpResponse(serializers.serialize('json',user))
+
+def sort_books_ajax(request,page_num,order_by):
+    sorted_books = get_katalog(page_num,order_by)
+    return HttpResponse(serializers.serialize('json',sorted_books))
+
+@csrf_exempt
+def sort_books_ajax_search(request,page_num,order_by):
+    sorted_books = search_katalog(last_searched, page_num,order_by)
+    return HttpResponse(serializers.serialize('json',sorted_books))
+
+@csrf_exempt
+def sort_main_ajax(request,page_num):
+    order_by=""
+    if request.method == 'POST':
+        order_by_value = request.POST.get('order_by')
+        if order_by_value == '1':
+            order_by = "asc"
+        elif order_by_value == '2':
+            order_by = "desc"
+        elif order_by_value == '3':
+            order_by = "year_asc"
+        elif order_by_value == '4':
+            order_by = "year_desc"
+        elif order_by_value == '5':
+            order_by = "atas_2000"
+        elif order_by_value == '6':
+            order_by = "bawah_2000"
+        else:
+            order_by = request.GET.get('order_by', 'asc')
+    else:
+        order_by = request.GET.get('order_by', 'asc')
+        
+    sorted_books = get_katalog(page_num,order_by)
+    
+    return HttpResponse(serializers.serialize('json',sorted_books))
+
