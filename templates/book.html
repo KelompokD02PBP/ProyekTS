@@ -63,10 +63,9 @@
                 </tr>`
             console.log("likes "+ likes)
             likes.forEach((l)=>{
-                res+=`\n<tr>
-                    <td>${l.fields.user}</td>
-                    <td>${l.fields.book}</td>
-                </tr>` 
+                res+="\n<tr>"
+                res+="<td><a href=\"{% url 'main:profile' user_id=123 %}\">".replace("123", l.fields.user)+l.fields.user+"</a></td>\n";
+                res+="\n</tr>"
             })
             document.getElementById('likedBy').innerHTML =res
         }

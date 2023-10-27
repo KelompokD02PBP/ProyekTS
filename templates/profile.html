@@ -5,53 +5,53 @@
     {% for m in messages %}
         <p>{{m}}</p>
     {% endfor %}
-    {% for p in profile%}
-        <h4 id="username">{{p.user.username}}</h4>
-        {% if p.profile_picture %}
-        <img id="profile_picture" style="width:20%; height:20%"src={{p.profile_picture.url}} alt="profile"/>
-        {% endif %}
-        <br/>
-        <p id="address">Address : {{p.address}}</p>
-        <p id="email">Email : {{p.email}}</p>
+    <h4 id="username">{{profile.user.username}}</h4>
+    {% if profile.profile_picture %}
+        <img id="profile_picture" style="width:20%; height:20%"src={{profile.profile_picture.url}} alt="profile"/>
+    {% endif %}
+    <br/>
+    <p id="address">Address : {{profile.address}}</p>
+    <p id="email">Email : {{profile.email}}</p>
 
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Update Profile</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="form" onsubmit="return false;">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="Username" class="col-form-label">Username:</label>
-                                <input type="text" class="form-control" id="Username" name="Username"></input>
-                            </div>
-                            <div class="mb-3">
-                                <label for="profile_picture" class="col-form-label">Profile Picture:</label>
-                                <input type="file" class="form-control" id="profile_picture" name="profile_picture"></input>
-                                {% comment %} <input type="text" class="form-control" id="profile_picture" name="profile_picture"></input> {% endcomment %}
-                            </div>
-                            <div class="mb-3">
-                                <label for="Address" class="col-form-label">Address:</label>
-                                <input type="text" class="form-control" id="Address" name="Address"></input>
-                            </div>
-                            <div class="mb-3">
-                                <label for="Email" class="col-form-label">Email:</label>
-                                <input type="text" class="form-control" id="Email" name="Email"></input>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" id="button_add" data-bs-dismiss="modal" onclick="update({{p.user.pk}})">Update Profile</button>
-                    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Update Profile</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form" onsubmit="return false;">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="Username" class="col-form-label">Username:</label>
+                            <input type="text" class="form-control" id="Username" name="Username"></input>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profile_picture" class="col-form-label">Profile Picture:</label>
+                            <input type="file" class="form-control" id="profile_picture" name="profile_picture"></input>
+                            {% comment %} <input type="text" class="form-control" id="profile_picture" name="profile_picture"></input> {% endcomment %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="Address" class="col-form-label">Address:</label>
+                            <input type="text" class="form-control" id="Address" name="Address"></input>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Email" class="col-form-label">Email:</label>
+                            <input type="text" class="form-control" id="Email" name="Email"></input>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="button_add" data-bs-dismiss="modal" onclick="update({{profile.user.pk}})">Update Profile</button>
                 </div>
             </div>
         </div>
+    </div>
+    {% if self_profile %}
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Update Profile</button>
-    {%endfor %}
+    {% endif %}
     <br>
 
     <h4>Books you've liked</h4>
