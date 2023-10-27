@@ -31,6 +31,7 @@ def show_main(request):
         if request.user.id !=None: #Kalo udh login bisa liat halaman
             context['page_num']=1
             context['books']=get_katalog(1)
+            context['user_id']=request.user.pk
 
     return render(request, "main.html", context)
 
@@ -39,8 +40,12 @@ def show_main_page(request, page_num):
     
     if request.user:
         context['name'] = request.user.username
+        if(page_num<=0):
+            page_num=1
         context['books'] = get_katalog(page_num)
         context['page_num'] = page_num
+        context['user_id']=request.user.pk
+
 
     return render(request, "main.html", context)
 
@@ -60,8 +65,12 @@ def show_main_search(request, page_num):
         
     if request.user:
         context['name'] = request.user.username
+        if(page_num<=0):
+            page_num=1
         context['page_num'] = page_num
         context['from_search']=True
+        context['user_id']=request.user.pk
+
         
         #search string kosong
         if to_find!=None and len(to_find)==0:
@@ -81,6 +90,11 @@ def show_main_search(request, page_num):
         # ganti page
         else:
             books = search_katalog("", page_num)
+
+            #Next page tapi udh habis
+            if(len(books)==0):
+                books = search_katalog("", page_num-1)
+                context['page_num']=page_num-1
             context['books'] = books
 
     return render(request, "main.html", context)
@@ -128,9 +142,12 @@ def logout_user(request):
 def get_katalog(page_num):
     result=[]
     books = Book.objects.all()
-    for i in range (page_num*50-50, page_num*50):
+    
+    i=page_num*20-20
+    while(i<page_num*20 and i<len(books)):
         result+=[books[i]]
-        
+        i+=1
+
     return result
 
 '''
@@ -144,11 +161,12 @@ def search_katalog(to_find ,page_num):
     if len(books_last_searched)==0:
         result=[]
         books = list(search_book2(to_find))
-        i=page_num*50-50
+        print(type(books))
+        i=page_num*20-20
 
         books_last_searched = books
         last_searched = to_find
-        while(i<len(books) and i<page_num*50):
+        while(i<len(books) and i<page_num*20):
             result.append(books[i])
             i+=1
 
@@ -156,9 +174,9 @@ def search_katalog(to_find ,page_num):
     else:
         result=[]
         books = books_last_searched
-        i=page_num*50-50
+        i=page_num*20-20
 
-        while(i<len(books) and i<page_num*50):
+        while(i<len(books) and i<page_num*20):
             result.append(books[i])
             i+=1
 
@@ -171,17 +189,34 @@ def book_review(request, id):
         book = Book.objects.get(pk=id)
         context['book']=book
         context['name'] = request.user.username
-        context['id'] = request.user.pk
+        context['user_id'] = request.user.pk
     return render(request, 'book.html', context)
 
-# Method buat buka profile page
-def show_self_profile(request):
-    print("in show_self_profile")
-    profile = ProfileUser.objects.filter(user=request.user)
-    books_you_like = Like.objects.filter(user=request.user)
+# # Method buat buka self profile page
+# def show_self_profile(request):
+#     print("in show_self_profile")
+#     profile = ProfileUser.objects.filter(user=request.user)
+#     books_you_like = Like.objects.filter(user=request.user)
+#     context = {"profile":profile}
+#     context['name']=request.user.username
+#     context['books_you_like']=books_you_like
+#     context['self_profile']=True
+    
+#     return render(request, "profile.html", context)
+
+# Method buat buka profile page orang lain
+def show_profile(request, user_id):
+    print("in show_profile")
+    print(user_id)
+    profile = ProfileUser.objects.get(user__pk=user_id)
+    books_you_like = Like.objects.filter(user__pk=user_id)
+    print("books", profile.user.username ,"person like like", books_you_like)
     context = {"profile":profile}
     context['name']=request.user.username
     context['books_you_like']=books_you_like
+    context['self_profile']=request.user==profile.user
+    context['user_id']=user_id
+    print(context['self_profile'])
     
     return render(request, "profile.html", context)
 
