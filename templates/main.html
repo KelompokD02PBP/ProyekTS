@@ -1,194 +1,207 @@
-{% extends 'base.html' %}
+    {% extends 'base.html' %}
 
-{% block content %}
+    {% block content %}
     <h2> Hello world! </h2>
 
     {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
     {% endif %}
 
     {% if page_num != -1 %}
-        {% if from_search %}
-            <a href="{% url 'main:show_main_page' 1 %}">
-                <button>Home</button>
-            </a>
-        {% else %}
-            <form name="search_bar" method="GET" action="{% url 'main:show_main_search' 1 %}">
-                <label for="search_bar">Search</label>
-                <input type="text" id="search_bar" name="search_bar"><br><br>
-                <input type="submit">
-            </form>
-            <hr>
-            {% if page_num == 1 %}
-                <div class="dropdown" style="margin-bottom: 10px;text-align: right;">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Sort & Filter
-                    </button>
-                    <div class="dropdown-menu" style="text-align: center;" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" onclick="sortBooks('1','asc')" href="#">Sort A-Z</a>
-                        <a class="dropdown-item" onclick="sortBooks('1','desc')" href="#">Sort Z-A</a>
-                        <a class="dropdown-item" onclick="sortBooks('1','year_asc')" href="#">Sort Year Asc</a>
-                        <a class="dropdown-item" onclick="sortBooks('1','year_desc')" href="#">Sort Year Desc</a>
-                        <a class="dropdown-item" onclick="sortBooks('1','atas_2000')" href="#">Filter 2000 and Up</a>
-                        <a class="dropdown-item" onclick="sortBooks('1','bawah_2000')" href="#">Filter Before 2000</a>
-                    </div>
-                </div>
-            {% else %}
-                <a href="{% url 'main:show_main_page' 1 %}?order_by={{ request.GET.order_by }}">
-                    <button>Home</button>
-                </a>
-            {% endif %}
-        {% endif %}
+    {% if from_search %}
+    <a href="{% url 'main:show_main_page' 1 %}">
+        <button>Home</button>
+    </a>
+    {% else %}
+    <form name="search_bar" method="GET" action="{% url 'main:show_main_search' 1 %}">
+        <label for="search_bar">Search</label>
+        <input type="text" id="search_bar" name="search_bar"><br><br>
+        <input type="submit">
+    </form>
+    <hr>
+    {% if page_num == 1 %}
 
-        {% if from_search %}
-            {% if page_num == 1 %}
-                <div class="dropdown" style="margin-bottom: 10px;text-align: right;">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Sort & Filter
-                    </button>
-                    <div class="dropdown-menu" style="text-align: center;" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" onclick="sortBooksSearch('1','asc')" href="#">Sort A-Z</a>
-                        <a class="dropdown-item" onclick="sortBooksSearch('1','desc')" href="#">Sort Z-A</a>
-                        <a class="dropdown-item" onclick="sortBooksSearch('1','year_asc')" href="#">Sort Year Asc</a>
-                        <a class="dropdown-item" onclick="sortBooksSearch('1','year_desc')" href="#">Sort Year Desc</a>
-                        <a class="dropdown-item" onclick="sortBooksSearch('1','atas_2000')" href="#">Filter 2000 and Up</a>
-                        <a class="dropdown-item" onclick="sortBooksSearch('1','bawah_2000')" href="#">Filter Before 2000</a>
-                    </div>
-                </div>
-            {% endif %}
-        {% endif %}
-
-        <div id="katalog" style="display: flex; flex-wrap: wrap;">
-            {% if books %}
-                {% for book in books %}
-                    <div class="card" style="width: 18rem; margin: 10px;">
-                        <div style="height: 250px;display: flex; justify-content: center;">
-                            <img class="card-img-top" src="{{ book.image_url_l }}" alt="Card image cap" style="height: 250px; object-fit: cover;">
-                        </div>
-                        <div class="container-card" style="display: flex;justify-content: space-between;"></div>
-                        <div class="card-body" style="display: flex; flex-direction: column;">
-                            <h5 class="card-title" style="font-size: 16px; margin: 0;">
-                                <p style="font-size: larger;">{{ book.title }}</p>
-                            </h5>
-                            <p class="card-text" style="font-size: 16px;">Published {{ book.year_of_publish }}</p>
-                            <p class="card-text" style="font-size: 16px;">by {{ book.publisher }}</p>
-                        </div>
-                        <div style="align-self: flex-end;margin:10px">
-                            <a href="{% url 'main:book_review' book.pk %}" class="btn btn-primary" style="font-size: 16px;">See More</a>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <h4 style="margin-top: 20px;margin-bottom: 20px;">There are no books left...</h4>
-            {% endif %}
+    <form name="sort_bar" method="POST" action="{% url 'main:show_main_page' 1 %}" id="sortForm">
+        {% csrf_token %}
+        <div class="input-group" style="margin-bottom: 10px;">
+            <select class="custom-select" name="order_by" id="inputGroupSelect04" onchange="handleSelectOption(this.value)">
+                <option selected>Choose...</option>
+                <option value="1">Sort A-Z</option>
+                <option value="2">Sort Z-A</option>
+                <option value="3">Sort Year Asc</option>
+                <option value="4">Sort Year Desc</option>
+                <option value="5">Filter 2000 and Up</option>
+                <option value="6">Filter Before 2000</option>
+            </select>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="submit">Sort & Filter</button>
+            </div>
         </div>
-
-        {% if not from_search %}
-            <a id="prevPageLink" href="{% url 'main:show_main_page' page_num|add:"-1" %}?order_by={{ request.GET.order_by|default:"asc" }}">
-                <button>PrevPage</button>
-            </a>
-            <a id="nextPageLink" href="{% url 'main:show_main_page' page_num|add:"1" %}?order_by={{ request.GET.order_by|default:"asc" }}">
-                <button>NextPage</button>
-            </a>
-        {% endif %}
-
-        {% if from_search %}
-            <a id="prevPageLink" href="{% url 'main:show_main_search' page_num|add:"-1" %}?order_by={{ request.GET.order_by|default:"asc" }}">
-                <button>PrevPageSearch</button>
-            </a>
-            <a id="nextPageLink" href="{% url 'main:show_main_search' page_num|add:"1" %}?order_by={{ request.GET.order_by|default:"asc" }}">
-                <button>NextPageSearch</button>
-            </a>
-        {% endif %}
+    </form>
+    {% else %}
+    <a href="{% url 'main:show_main_page' 1 %}?order_by={{ request.GET.order_by }}">
+        <button>Home</button>
+    </a>
     {% endif %}
-</div>
+    {% endif %}
 
-<script>
-    async function getBooks(page_num, orderBy) {
-        console.log(page_num)
-        console.log(orderBy)
-        return fetch(`/sort_books/${page_num}/${orderBy}`).then((res) => res.json());
-    }
+    {% if from_search %}
+    {% if page_num == 1 %}
 
-    async function sortBooks(page_num, orderBy) {
-        const sortedBooks = await getBooks(page_num, orderBy);
-        document.getElementById("katalog").innerHTML = "";
-        let htmlString = "";
-        console.log(sortedBooks);
-        sortedBooks.forEach((book) => {
-            htmlString += `
-            <div class="card" style="width: 18rem; margin: 10px;">
-                <div style="height: 250px;display: flex; justify-content: center;">
-                    <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover;">
-                </div>
-                <div class="card-body" style="display: flex; flex-direction: column;">
-                    <h5 class="card-title" style="font-size: 16px; margin: 0;">
-                        <p style="font-size: larger;">${book.fields.title}</p>
-                    </h5>
-                    <p class="card-text" style="font-size: 16px;">Published ${book.fields.year_of_publish}</p>
-                    <p class="card-text" style="font-size: 16px;">by ${book.fields.publisher}</p>
-                </div>
-                <div style="align-self: flex-end;margin:10px">
-                    <a href="/book/${book.pk}" class="btn btn-primary" style="font-size: 16px;">See More</a>
-                </div>
-            </div>`;
-        });
-        handleOrder(orderBy);
-        document.getElementById("katalog").innerHTML = htmlString;
-    }
+    <div class="dropdown" style="margin-bottom: 10px;text-align: right;">
+        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            Sort & Filter
+        </button>
+        <div class="dropdown-menu" style="text-align: center;" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" onclick="sortBooksSearch('1','asc')" href="#">Sort A-Z</a>
+            <a class="dropdown-item" onclick="sortBooksSearch('1','desc')" href="#">Sort Z-A</a>
+            <a class="dropdown-item" onclick="sortBooksSearch('1','year_asc')" href="#">Sort Year Asc</a>
+            <a class="dropdown-item" onclick="sortBooksSearch('1','year_desc')" href="#">Sort Year Desc</a>
+            <a class="dropdown-item" onclick="sortBooksSearch('1','atas_2000')" href="#">Filter 2000 and Up</a>
+            <a class="dropdown-item" onclick="sortBooksSearch('1','bawah_2000')" href="#">Filter Before 2000</a>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
 
-    async function handleOrder(orderBy) {
-        const prevPageLink = document.getElementById('prevPageLink');
-        const nextPageLink = document.getElementById('nextPageLink');
+    <div id="katalog" style="display: flex; flex-wrap: wrap;">
+        {% if books %}
+        {% for book in books %}
+        <div class="card" style="width: 18rem; margin: 10px;">
+            <div style="height: 250px;display: flex; justify-content: center;">
+                <img class="card-img-top" src="{{ book.image_url_l }}" alt="Card image cap"
+                    style="height: 250px; object-fit: cover;">
+            </div>
+            <div class="container-card" style="display: flex;justify-content: space-between;"></div>
+            <div class="card-body" style="display: flex; flex-direction: column;">
+                <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                    <p style="font-size: larger;">{{ book.title }}</p>
+                </h5>
+                <p class="card-text" style="font-size: 16px;">Published {{ book.year_of_publish }}</p>
+                <p class="card-text" style="font-size: 16px;">by {{ book.publisher }}</p>
+            </div>
+            <div style="align-self: flex-end;margin:10px">
+                <a href="{% url 'main:book_review' book.pk %}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <h4 style="margin-top: 20px;margin-bottom: 20px;">There are no books left...</h4>
+        {% endif %}
+    </div>
 
-        prevPageLink.href = `{% url 'main:show_main_page' page_num|add:"-1" %}?order_by=${orderBy}`;
-        nextPageLink.href = `{% url 'main:show_main_page' page_num|add:"1" %}?order_by=${orderBy}`;
-    }
+    {% if not from_search %}
+    <a id="prevPageLink" href="{% url 'main:show_main_page' page_num|add:" -1" %}?order_by={{
+        request.GET.order_by|default:"asc" }}">
+        <button>PrevPage</button>
+    </a>
+    <a id="nextPageLink" href="{% url 'main:show_main_page' page_num|add:" 1" %}?order_by={{
+        request.GET.order_by|default:"asc" }}">
+        <button>NextPage</button>
+    </a>
+    {% endif %}
 
-    async function getBooksSearch(page_num, orderBy) {
-        console.log(page_num)
-        console.log(orderBy)
-        return fetch(`/sort_books_search/${page_num}/${orderBy}`).then((res) => res.json());
-    }
+    {% if from_search %}
+    <a id="prevPageLink" href="{% url 'main:show_main_search' page_num|add:" -1" %}?order_by={{
+        request.GET.order_by|default:"asc" }}">
+        <button>PrevPageSearch</button>
+    </a>
+    <a id="nextPageLink" href="{% url 'main:show_main_search' page_num|add:" 1" %}?order_by={{
+        request.GET.order_by|default:"asc" }}">
+        <button>NextPageSearch</button>
+    </a>
+    {% endif %}
+    {% endif %}
+    </div>
 
-    async function sortBooksSearch(page_num, orderBy) {
-        const sortedBooks = await getBooksSearch(page_num, orderBy);
-        document.getElementById("katalog").innerHTML = "";
-        let htmlString = "";
-        console.log(sortedBooks);
-        sortedBooks.forEach((book) => {
-            htmlString += `
-            <div class="card" style="width: 18rem; margin: 10px;">
-                <div style="height: 250px;display: flex; justify-content: center;">
-                    <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover;">
-                </div>
-                <div class="card-body" style="display: flex; flex-direction: column;">
-                    <h5 class="card-title" style="font-size: 16px; margin: 0;">
-                        <p style="font-size: larger;">${book.fields.title}</p>
-                    </h5>
-                    <p class="card-text" style="font-size: 16px;">Published ${book.fields.year_of_publish}</p>
-                    <p class="card-text" style="font-size: 16px;">by ${book.fields.publisher}</p>
-                </div>
-                <div style="align-self: flex-end;margin:10px">
-                    <a href="/book/${book.pk}" class="btn btn-primary" style="font-size: 16px;">See More</a>
-                </div>
-            </div>`;
-        });
-        handleOrderSearch(orderBy);
-        document.getElementById("katalog").innerHTML = htmlString;
-    }
 
-    async function handleOrderSearch(orderBy) {
-        const prevPageLink = document.getElementById('prevPageLink');
-        const nextPageLink = document.getElementById('nextPageLink');
 
-        prevPageLink.href = `{% url 'main:show_main_search' page_num|add:"-1" %}?order_by=${orderBy}`;
-        nextPageLink.href = `{% url 'main:show_main_search' page_num|add:"1" %}?order_by=${orderBy}`;
-    }
-</script>
+    {%if user.is_authenticated%}
 
+    <script>
+        async function getBooksSearch(page_num, orderBy) {
+            console.log(page_num)
+            console.log(orderBy)
+            return fetch(`/sort_books_search/${page_num}/${orderBy}`).then((res) => res.json());
+        }
+
+        async function sortBooksSearch(page_num, orderBy) {
+            const sortedBooks = await getBooksSearch(page_num, orderBy);
+            document.getElementById("katalog").innerHTML = "";
+            let htmlString = "";
+            console.log(sortedBooks);
+            sortedBooks.forEach((book) => {
+                htmlString += `
+                <div class="card" style="width: 18rem; margin: 10px;">
+                    <div style="height: 250px;display: flex; justify-content: center;">
+                        <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover;">
+                    </div>
+                    <div class="card-body" style="display: flex; flex-direction: column;">
+                        <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                            <p style="font-size: larger;">${book.fields.title}</p>
+                        </h5>
+                        <p class="card-text" style="font-size: 16px;">Published ${book.fields.year_of_publish}</p>
+                        <p class="card-text" style="font-size: 16px;">by ${book.fields.publisher}</p>
+                    </div>
+                    <div style="align-self: flex-end;margin:10px">
+                        <a href="/book/${book.pk}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+                    </div>
+                </div>`;
+            });
+            handleOrderSearch(orderBy);
+            document.getElementById("katalog").innerHTML = htmlString;
+        }
+
+        async function handleOrderSearch(orderBy) {
+            const prevPageLink = document.getElementById('prevPageLink');
+            const nextPageLink = document.getElementById('nextPageLink');
+
+            prevPageLink.href = `{% url 'main:show_main_search' page_num|add:"-1" %}?order_by=${orderBy}`;
+            nextPageLink.href = `{% url 'main:show_main_search' page_num|add:"1" %}?order_by=${orderBy}`;
+        }
+
+
+        function handleSubmit(value) {
+
+            if (value === '1') {
+                sortBooks('1', 'asc')
+            } else if (value === '2') {
+                sortBooks('1', 'desc')
+            } else if (value === '3') {
+                sortBooks('1', 'year_asc')
+            } else if (value === '4') {
+                sortBooks('1', 'year_desc')
+            } else if (value === '5') {
+                sortBooks('1', 'atas_2000')
+            } else if (value === '6') {
+                sortBooks('1', 'bawah_2000')
+            }
+        }
+
+        function handleSelectOption(value) {
+            var form = document.getElementById('sortForm');
+            var selectedValue = document.getElementById('inputGroupSelect04').value;
+            if (selectedValue === '1') {
+                selectedValue = 'asc'
+            } else if (selectedValue === '2') {
+                selectedValue = 'desc'
+            } else if (selectedValue === '3') {
+                selectedValue = 'year_asc'
+            } else if (selectedValue === '4') {
+                selectedValue = 'year_desc'
+            } else if (selectedValue === '5') {
+                selectedValue = 'atas_2000'
+            } else if (selectedValue === '6') {
+                selectedValue = 'bawah_2000'
+            }
+
+            form.action = "{% url 'main:show_main_page' 1 %}?order_by=" + selectedValue;
+        }
+    </script>
+{% endif %}
 {% endblock content %}

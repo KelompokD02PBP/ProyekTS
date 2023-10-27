@@ -17,7 +17,7 @@ from django.contrib.auth.models import User
 
 from django.views.decorators.csrf import csrf_exempt
 
-@login_required(login_url='/login')
+
 def show_main(request):
     context = {}
     
@@ -31,16 +31,33 @@ def show_main(request):
 
     return render(request, "main.html", context)
 
-
-
 def show_main_page(request, page_num):
     context = {}
-    
+    order_by=""
+    if request.method == 'POST':
+        order_by_value = request.POST.get('order_by')
+        if order_by_value == '1':
+            order_by = "asc"
+        elif order_by_value == '2':
+            order_by = "desc"
+        elif order_by_value == '3':
+            order_by = "year_asc"
+        elif order_by_value == '4':
+            order_by = "year_desc"
+        elif order_by_value == '5':
+            order_by = "atas_2000"
+        elif order_by_value == '6':
+            order_by = "bawah_2000"
+        else:
+            order_by = request.GET.get('order_by', 'asc')
+    else:
+        order_by = request.GET.get('order_by', 'asc')
+
     if request.user:
         context['name'] = request.user.username
-        if(page_num<=0):
-            page_num=1
-        context['books']=get_katalog(page_num, order_by=request.GET.get('order_by'))
+        if page_num <= 0:
+            page_num = 1
+        context['books'] = get_katalog(page_num, order_by=order_by)
         context['page_num'] = page_num
 
     return render(request, "main.html", context)
@@ -50,6 +67,7 @@ Show main jika search
 '''
 books_last_searched=[] #simpen search sebelumnya biar bisa next/prior page dengan cepat
 last_searched="" #simpen kata yang di search terakhir
+
 
 def show_main_search(request, page_num):
     global books_last_searched
@@ -93,6 +111,19 @@ def show_main_search(request, page_num):
             context['books'] = books
     #   
     return render(request, "main.html", context)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def register(request):
     form = UserCreationForm()
@@ -167,8 +198,16 @@ def search_katalog(to_find ,page_num,order_by):
         
         if order_by=='asc' or order_by == None:
             books = list(search_book2(to_find).order_by("title"))
-        else:
+        elif order_by=='desc':
             books = list(search_book2(to_find).order_by("-title"))
+        elif order_by == "year_asc":
+            books = list(search_book2(to_find).order_by("year_of_publish"))
+        elif order_by == "year_desc":
+            books = list(search_book2(to_find).order_by("-year_of_publish"))
+        elif order_by == "atas_2000":
+            books = list(search_book2(to_find).filter(year_of_publish__gte=2000))
+        elif order_by == "bawah_2000":
+            books = list(search_book2(to_find).filter(year_of_publish__lt=2000))
             
         i=page_num*20-20
 
