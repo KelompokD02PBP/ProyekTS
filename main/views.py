@@ -261,3 +261,8 @@ def like_dislike_ajax(request):
 def sort_books_ajax(request,page_num,order_by):
     sorted_books = get_katalog(page_num,order_by)
     return HttpResponse(serializers.serialize('json',sorted_books))
+
+@csrf_exempt
+def sort_books_ajax_search(request,page_num,order_by):
+    sorted_books = search_katalog(last_searched, page_num,order_by)
+    return HttpResponse(serializers.serialize('json',sorted_books))
