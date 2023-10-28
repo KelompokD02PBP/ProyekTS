@@ -59,6 +59,7 @@ def show_main_page(request, page_num):
     else:
         order_by = request.GET.get('order_by', 'asc')
 
+    
     if request.user:
         context['name'] = request.user.username
         if page_num <= 0:

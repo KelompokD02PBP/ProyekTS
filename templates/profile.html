@@ -1,26 +1,28 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>PROFILE</h2>
-    {% for m in messages %}
-        <p>{{m}}</p>
-    {% endfor %}
-    <h4 id="username">{{profile.user.username}}</h4>
-    {% if profile.profile_picture %}
-        <img id="profile_picture" style="width:20%; height:20%"src={{profile.profile_picture.url}} alt="profile"/>
-    {% endif %}
-    <br/>
-    <p id="address">Address : {{profile.address}}</p>
-    <p id="email">Email : {{profile.email}}</p>
+<div class="container" style="color: #ffffff; text-align: center; margin-bottom: 40px;">
+    <div class="row">
+        <div class="col-sm-12">
+            <h2>PROFILE</h2>
+            <h4 id="username">{{profile.user.username}}</h4>
+            {% if profile.profile_picture %}
+            <div style="width: 50%; height: auto; margin: 10px auto;">
+                <img id="profile_picture" class="img-fluid" src={{profile.profile_picture.url}} alt="profile" />
+            </div>
+            {% endif %}
+            <br />
+            <p id="address">Address: {{profile.address}}</p>
+            <p id="email">Email: {{profile.email}}</p>
 
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content" style="color: black;">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Update Profile</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="color: black;text-align: left;">
                     <form id="form" onsubmit="return false;">
                         {% csrf_token %}
                         <div class="mb-3">
@@ -55,11 +57,33 @@
     <br>
 
     <h4>Books you've liked</h4>
+    <div class="carousel-container" style="height: 400px; width: 300px; overflow: hidden; position: relative;">
+        <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+                {% for like in books_you_like %}
+                <div class="carousel-item {% if forloop.first %} active {% endif %}">
+                    <a href="{% url 'main:book_review' like.book.pk %}">
+                        <img class="d-block w-100" src="{{like.book.image_url_l}}" alt="Book Image">
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="flex" style="justify-content: center;align-items: center;text-align: center;">
 
-    {% for like in books_you_like %}
-        <a href="{% url 'main:book_review' like.book.pk %}">{{like.book.title}}</p>
-    {% endfor %}
+                <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev" style="background-color: red;height: 50px;margin-top: 200px;">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next" style="background-color: red; height: 50px;margin-top: 200px;">
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+        </div>
+    </div>
+    
 
+    
+        </div>
     <script>
         async function refresh_profile(data){
             //console.log(data)
