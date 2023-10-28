@@ -1,5 +1,6 @@
     {% extends 'base.html' %}
 
+<<<<<<< HEAD
     {% block content %}
     
     {% if page_num != -1 %}
@@ -11,6 +12,19 @@
     </a>
     {% else %}
     <form style="color: #ffffff"  name="search_bar" method="GET" action="{% url 'main:show_main_search' 1 %}">
+=======
+{% if messages %}  
+    <ul>   
+        {% for message in messages %}  
+            <li>{{ message }}</li>  
+            {% endfor %}  
+    </ul>
+{% endif %}
+
+{% if page_num != -1 %}
+
+    <form name="search_bar" method ="GET" action="{% url 'main:show_main_search' 1 %}">
+>>>>>>> 5eafa6a42a44723031a59879e7d010e168e593a1
         <label for="search_bar">Search</label>
         <input style="border-radius: 10px;margin-top: 10px;" type="text" id="search_bar" name="search_bar"><br><br>
         <input  style="background-color: #dfdfdf;" class="btn" type="submit"onmouseover="this.style.backgroundColor='#808080'" onmouseout="this.style.backgroundColor='#dfdfdf'">
@@ -91,6 +105,32 @@
      </div>
      <hr>
      {% endif %}
+
+         <!-- filter yang sudah di like -->
+    {% if likes|length > 0 %}
+    <div class="overflow-x-auto ">
+        <h2>Liked Books</h2>
+        <div class="d-flex flex-nowrap">
+            {% for book in likes %}
+            <div class="card flex-shrink-0" style="width: 18rem; margin: 10px;">
+                <div style="height: 250px;display: flex; justify-content: center;">
+                    <img class="card-img-top" src="{{ book.image_url_l }}" alt="Card image cap" style="height: 250px; object-fit: cover;">
+                </div> 
+                <div class="container-card" style="display: flex;justify-content: space-between;"></div>
+                <div class="card-body" style="display: flex; flex-direction: column;">
+                    <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                        <p style="font-size: larger;">{{ book.title }}</p>
+                    </h5>
+                    <p class="card-text" style="font-size: 14px;">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                </div>
+                <div style="align-self: flex-end;margin:10px">
+                    <a href="{% url 'main:book_review' book.pk %}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
     <div id="katalog" style="display: flex; flex-wrap: wrap;">
         {% if books %}
@@ -275,5 +315,9 @@
 
     </script>
 {% endif %}
+<<<<<<< HEAD
             
 {% endblock content %}
+=======
+{% endblock content %}
+>>>>>>> 5eafa6a42a44723031a59879e7d010e168e593a1
