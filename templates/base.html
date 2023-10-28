@@ -37,14 +37,14 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
 
                 </div>
-                <span class="navbar-text" style="margin-right: 20px;color: #ecbe17;">
-                    {% if name %}
-                        <a style="color: #ecbe17;" href="{% url 'main:profile' user_id %}">Profile</a>
+                <span class="navbar-text" style="margin-right: 5px;">
+                    {% if request.user.is_authenticated %}
+                        <a style="color: #ecbe17;" href="{% url 'main:profile' user_id=request.user.pk %}">Hello, {{request.user.username}}!</a>
                     {% else %}
                         Hello there, please log in.
                     {% endif%}
                 </span>
-                {% if name %}
+                {% if request.user.is_authenticated %}
                 <a href="{% url 'main:logout' %}">
                     <button style="color: #ffffff; background-color: #000000;" class="btn" onmouseover="this.style.backgroundColor='#aeaeae'" onmouseout="this.style.backgroundColor='#000000'">Logout</button>
                 </a>

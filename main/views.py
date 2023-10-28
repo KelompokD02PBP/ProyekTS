@@ -15,10 +15,14 @@ from .models import Like, ProfileUser
 from .forms import ProfileUserForm
 
 from django.core import serializers
+from django.core.validators import validate_email
 
 from django.contrib.auth.models import User
 
 from django.views.decorators.csrf import csrf_exempt
+
+from PIL import Image
+Image.MAX_IMAGE_PIXELS = 1000000
 
 from re import match
 
@@ -28,6 +32,8 @@ def show_main(request):
     if request.user:
         context['name'] = request.user.username
         context['page_num']=-1 #Kalo blm login gk bisa ngapa-ngapain
+        
+        context['aaa'] = request.user.pk
 
         if request.user.id !=None: #Kalo udh login bisa liat halaman
             context['page_num']=1
@@ -39,7 +45,7 @@ def show_main(request):
 
 def show_main_page(request, page_num):
     context = {}
-    order_by=""
+    
     if request.method == 'POST':
         order_by_value = request.POST.get('order_by')
         if order_by_value == '1':
@@ -99,8 +105,8 @@ def show_main_search(request, page_num):
             return HttpResponseRedirect(reverse("main:show_main_page", kwargs={'page_num':1}))
 
         # yang dicari beda lagi, kosongin list sebelumnya
-        # to_find!=None buat pastiin bukan gr gr refresh/nextpage
-        if to_find!=None and last_searched!=to_find:
+        # to_find != None buat pastiin bukan gr gr refresh/nextpage
+        if to_find != None and last_searched!=to_find:
             books_last_searched=[]
             last_searched=""
         
@@ -318,39 +324,49 @@ def like_dislike_ajax(request):
 @csrf_exempt
 def update_profile(request):
     print("in update_profile")
-    if request.method == 'POST':
-        username = request.POST.get("Username")
-        already_exist = User.objects.filter(username=username)
 
+    if request.method == 'POST':
         address = request.POST.get("Address")
         email = request.POST.get("Email")
         image = request.FILES.get("profile_picture")
         print("img/",image)
-        user_id = request.POST.get("id")
+        username = request.POST.get("Username")
+        already_exist = User.objects.filter(username=username)
 
+        user_id = request.POST.get("id")
         user = User.objects.get(pk=user_id)
-        profile = ProfileUser.objects.filter(user=user)
-        profile_list = list(profile)
-        
-        #Jika username taken
-        if(len(already_exist)!=0):
+        profile = ProfileUser.objects.filter(user=user)[0]
+
+        #Jika username taken by another person
+        if(len(already_exist)!=0 and already_exist[0].pk != profile.pk):
             messages.info(request, 'Sorry, username taken')
-            return HttpResponse(serializers.serialize('json',profile))
+            return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
         
         #Jika bukan email
-        if(not match(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$',email)):
+        try:
+            validate_email(email)
+        except:
             messages.info(request, 'Invalid email')
-            return HttpResponse(serializers.serialize('json',profile))
+            return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
         
-        profile_list[0].address=address
-        profile_list[0].email=email
-        profile_list[0].profile_picture=image
-        user.username=username
-        user.save()
-        profile_list[0].save()
+        # check media validity
+        if image != None:
+            try:
+                img = Image.open(image)
+                img.verify()
+            except:
+                messages.info(request, 'Invalid image')
+                return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
 
-        print(profile_list[0])
-        return HttpResponse(serializers.serialize('json',profile_list))
+        profile.address = address
+        profile.email = email
+        profile.profile_picture = image
+        user.username = username
+        user.save()
+        profile.save()
+
+        print(profile)
+        return HttpResponse(serializers.serialize('json',[profile]))
     return HttpResponseNotFound()
 
 @csrf_exempt
