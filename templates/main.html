@@ -20,8 +20,8 @@
 
     <form onsubmit="return false;" id="sortForm">
         {% csrf_token %}
-        <div class="input-group" style="margin-bottom: 10px;" >
-            <select class="custom-select" name="order_by" id="inputGroupSelect04"">
+        <div class="input-group" style="margin-bottom: 10px;">
+            <select class="custom-select" name="order_by" id="inputGroupSelect04">
                 <option selected>Choose...</option>
                 <option value="1">Sort A-Z</option>
                 <option value="2">Sort Z-A</option>
@@ -244,8 +244,6 @@
             nextPageLink.href = `{% url 'main:show_main_page' page_num|add:"1" %}?order_by=${orderBy}`;
         }
         document.getElementById("button_submit").onclick = handleFormSubmit
-
-
 
     </script>
 {% endif %}
