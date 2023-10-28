@@ -16,5 +16,5 @@ urlpatterns = [
     path('like-dislike/', like_dislike_ajax , name="like_dislike"), 
     path('sort_books_search/<int:page_num>/<str:order_by>/',sort_books_ajax_search,name="sort_books_search"),
     path('ajax/<int:page_num>/',sort_main_ajax,name="sort_main_ajax"),
-    
+    path('ajaxsearch/<int:page_num>/',sort_main_ajax_search,name="sort_main_ajax_search"),
 ]
