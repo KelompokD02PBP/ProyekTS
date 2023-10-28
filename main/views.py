@@ -68,7 +68,6 @@ def show_main_page(request, page_num):
 
     if request.user:
         context['name'] = request.user.username
-        context['books'] = get_katalog(page_num)
         context['likes']=get_liked_books(request.user)
         if page_num <= 0:
             page_num = 1
