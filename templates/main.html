@@ -1,26 +1,19 @@
     {% extends 'base.html' %}
 
     {% block content %}
-    <h2> Hello world! </h2>
-
-    {% if messages %}
-    <ul>
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-
+    
     {% if page_num != -1 %}
+    <h2 style="color: #ecbe17;" > Hello, {{name|capfirst}}! </h2>
+ 
     {% if from_search %}
     <a href="{% url 'main:show_main_page' 1 %}">
         <button>Home</button>
     </a>
     {% else %}
-    <form name="search_bar" method="GET" action="{% url 'main:show_main_search' 1 %}">
+    <form style="color: #ffffff"  name="search_bar" method="GET" action="{% url 'main:show_main_search' 1 %}">
         <label for="search_bar">Search</label>
-        <input type="text" id="search_bar" name="search_bar"><br><br>
-        <input type="submit">
+        <input style="border-radius: 10px;margin-top: 10px;" type="text" id="search_bar" name="search_bar"><br><br>
+        <input  style="background-color: #dfdfdf;" class="btn" type="submit"onmouseover="this.style.backgroundColor='#808080'" onmouseout="this.style.backgroundColor='#dfdfdf'">
     </form>
     <hr>
     {% if page_num == 1 %}
@@ -38,7 +31,7 @@
                 <option value="6">Filter Before 2000</option>
             </select>
             <div class="input-group-append">
-                <button id="button_submit" class="btn btn-outline-secondary" type="submit">Sort & Filter</button>
+                <button onmouseover="this.style.backgroundColor='#808080'" onmouseout="this.style.backgroundColor='#000000'" id="button_submit" class="btn btn-outline-secondary" type="submit">Sort & Filter</button>
             </div>
         </div>
     </form>
@@ -51,28 +44,30 @@
 
     {% if from_search %}
     {% if page_num == 1 %}
-
-    <div class="dropdown" style="margin-bottom: 10px;text-align: right;">
-        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
-            aria-haspopup="true" aria-expanded="false">
-            Sort & Filter
-        </button>
-        <div class="dropdown-menu" style="text-align: center;" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" onclick="sortBooksSearch('1','asc')" href="#">Sort A-Z</a>
-            <a class="dropdown-item" onclick="sortBooksSearch('1','desc')" href="#">Sort Z-A</a>
-            <a class="dropdown-item" onclick="sortBooksSearch('1','year_asc')" href="#">Sort Year Asc</a>
-            <a class="dropdown-item" onclick="sortBooksSearch('1','year_desc')" href="#">Sort Year Desc</a>
-            <a class="dropdown-item" onclick="sortBooksSearch('1','atas_2000')" href="#">Filter 2000 and Up</a>
-            <a class="dropdown-item" onclick="sortBooksSearch('1','bawah_2000')" href="#">Filter Before 2000</a>
+     <form style="margin-top: 20px;" onsubmit="return false;" id="sortFormSearch">
+        {% csrf_token %}
+        <div class="input-group" style="margin-bottom: 10px;">
+            <select class="custom-select" name="order_by" id="inputGroupSelect05"">
+                <option selected>Choose...</option>
+                <option value="1">Sort A-Z</option>
+                <option value="2">Sort Z-A</option>
+                <option value="3">Sort Year Asc</option>
+                <option value="4">Sort Year Desc</option>
+                <option value="5">Filter 2000 and Up</option>
+                <option value="6">Filter Before 2000</option>
+            </select>
+            <div class="input-group-append">
+                <button id="button_submit_search" class="btn btn-outline-secondary" type="submit">Sort & Filter</button>
+            </div>
         </div>
-    </div>
+    </form>
     {% endif %}
     {% endif %}
 
     <div id="katalog" style="display: flex; flex-wrap: wrap;">
         {% if books %}
         {% for book in books %}
-        <div class="card" style="width: 18rem; margin: 10px;">
+        <div class="card" style="width: 18rem; margin: 10px;background-color: #1a1a1a;color: #ffffff;">
             <div style="height: 250px;display: flex; justify-content: center;">
                 <img class="card-img-top" src="{{ book.image_url_l }}" alt="Card image cap"
                     style="height: 250px; object-fit: cover;">
@@ -86,7 +81,7 @@
                 <p class="card-text" style="font-size: 16px;">by {{ book.publisher }}</p>
             </div>
             <div style="align-self: flex-end;margin:10px">
-                <a href="{% url 'main:book_review' book.pk %}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+                <a  href="{% url 'main:book_review' book.pk %}" class="btn btn-primary" style="font-size: 16px;">See More</a>
             </div>
         </div>
         {% endfor %}
@@ -95,23 +90,25 @@
         {% endif %}
     </div>
 
-    {% if not from_search %}
-    <a id="prevPageLink" href="{% url 'main:show_main_page' page_num|add:" -1" %}?order_by={{request.GET.order_by|default:"asc" }}">
-        <button>PrevPage</button>
-    </a>
-    <a id="nextPageLink" href="{% url 'main:show_main_page' page_num|add:" 1" %}?order_by={{request.GET.order_by|default:"asc" }}">
-        <button>NextPage</button>
-    </a>
-    {% endif %}
-
-    {% if from_search %}
-    <a id="prevPageLink" href="{% url 'main:show_main_search' page_num|add:" -1" %}?order_by={{request.GET.order_by|default:"asc" }}">
-        <button>PrevPageSearch</button>
-    </a>
-    <a id="nextPageLink" href="{% url 'main:show_main_search' page_num|add:" 1" %}?order_by={{request.GET.order_by|default:"asc" }}">
-        <button>NextPageSearch</button>
-    </a>
-    {% endif %}
+    <div style="display: flex; flex-direction: row; align-items: center; margin-top: 20px; margin-bottom: 40px; justify-content: center;gap: 20px;">
+        {% if not from_search %}
+        <a id="prevPageLink" href="{% url 'main:show_main_page' page_num|add:" -1" %}?order_by={{request.GET.order_by|default:"asc" }}">
+            <button style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">PrevPage</button>
+        </a>
+        <a id="nextPageLink" href="{% url 'main:show_main_page' page_num|add:" 1" %}?order_by={{request.GET.order_by|default:"asc" }}">
+            <button style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">NextPage</button>
+        </a>
+        {% endif %}
+    
+        {% if from_search %}
+        <a id="prevPageLink" href="{% url 'main:show_main_search' page_num|add:" -1" %}?order_by={{request.GET.order_by|default:"asc" }}">
+            <button>PrevPageSearch</button>
+        </a>
+        <a id="nextPageLink" href="{% url 'main:show_main_search' page_num|add:" 1" %}?order_by={{request.GET.order_by|default:"asc" }}">
+            <button>NextPageSearch</button>
+        </a>
+        {% endif %}
+    </div>
     {% endif %}
     </div>
 
@@ -120,17 +117,38 @@
     {%if user.is_authenticated%}
 
     <script>
-        async function getBooksSearch(page_num, orderBy) {
-            console.log(page_num)
-            console.log(orderBy)
-            return fetch(`/sort_books_search/${page_num}/${orderBy}`).then((res) => res.json());
-        }
+        
+        async function handleFormSubmitSearch(){
+            const form = document.querySelector('#sortFormSearch');
+            console.log("masuksini")
+            const selectedValue = document.getElementById('inputGroupSelect05').value;
+            let orderBy;
 
-        async function sortBooksSearch(page_num, orderBy) {
-            const sortedBooks = await getBooksSearch(page_num, orderBy);
-            document.getElementById("katalog").innerHTML = "";
+            if (selectedValue === '1') {
+                orderBy = 'asc';
+            } else if (selectedValue === '2') {
+                orderBy = 'desc';
+            } else if (selectedValue === '3') {
+                orderBy = 'year_asc';
+            } else if (selectedValue === '4') {
+                orderBy = 'year_desc';
+            } else if (selectedValue === '5') {
+                orderBy = 'atas_2000';
+            } else if (selectedValue === '6') {
+                orderBy = 'bawah_2000';
+            }
+
+            const response = await fetch(`/ajaxsearch/1/`, {
+                method: 'POST',
+                body: new FormData(form)
+            });
+            console.log("test")
+            console.log(response)
+
+            const sortedBooks = await response.json();
+
             let htmlString = "";
-            console.log(sortedBooks);
+
             sortedBooks.forEach((book) => {
                 htmlString += `
                 <div class="card" style="width: 18rem; margin: 10px;">
@@ -141,8 +159,7 @@
                         <h5 class="card-title" style="font-size: 16px; margin: 0;">
                             <p style="font-size: larger;">${book.fields.title}</p>
                         </h5>
-                        <p class="card-text" style="font-size: 16px;">Published ${book.fields.year_of_publish}</p>
-                        <p class="card-text" style="font-size: 16px;">by ${book.fields.publisher}</p>
+                        <p class="card-text" style="font-size: 14px;">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
                     </div>
                     <div style="align-self: flex-end;margin:10px">
                         <a href="/book/${book.pk}" class="btn btn-primary" style="font-size: 16px;">See More</a>
@@ -151,35 +168,21 @@
             });
             handleOrderSearch(orderBy);
             document.getElementById("katalog").innerHTML = htmlString;
-        }
 
+        }
+        
         async function handleOrderSearch(orderBy) {
             const prevPageLink = document.getElementById('prevPageLink');
             const nextPageLink = document.getElementById('nextPageLink');
-
+            
             prevPageLink.href = `{% url 'main:show_main_search' page_num|add:"-1" %}?order_by=${orderBy}`;
             nextPageLink.href = `{% url 'main:show_main_search' page_num|add:"1" %}?order_by=${orderBy}`;
         }
+        document.getElementById("button_submit_search").onclick = handleFormSubmitSearch
+        
 
-
-        function handleSubmit(value) {
-
-            if (value === '1') {
-                sortBooks('1', 'asc')
-            } else if (value === '2') {
-                sortBooks('1', 'desc')
-            } else if (value === '3') {
-                sortBooks('1', 'year_asc')
-            } else if (value === '4') {
-                sortBooks('1', 'year_desc')
-            } else if (value === '5') {
-                sortBooks('1', 'atas_2000')
-            } else if (value === '6') {
-                sortBooks('1', 'bawah_2000')
-            }
-        }
-
-
+        
+        
         async function handleFormSubmit(){
             console.log("masukk")
             const form = document.querySelector('#sortForm');
@@ -241,8 +244,6 @@
             nextPageLink.href = `{% url 'main:show_main_page' page_num|add:"1" %}?order_by=${orderBy}`;
         }
         document.getElementById("button_submit").onclick = handleFormSubmit
-
-
 
     </script>
 {% endif %}

@@ -146,6 +146,7 @@ def register(request):
     context = {'user_form':user_form, 'profile_form':profile_form}
     return render(request, 'register.html', context)
 
+
 def login_user(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -164,7 +165,7 @@ def login_user(request):
 
 def logout_user(request):
     logout(request)
-    response = HttpResponseRedirect(reverse('main:login'))
+    response = HttpResponseRedirect(reverse('main:show_main'))
     response.delete_cookie('last_login')
     return response
 
@@ -410,3 +411,28 @@ def sort_main_ajax(request,page_num):
     
     return HttpResponse(serializers.serialize('json',sorted_books))
 
+@csrf_exempt
+def sort_main_ajax_search(request,page_num):
+    order_by=""
+    if request.method == 'POST':
+        order_by_value = request.POST.get('order_by')
+        if order_by_value == '1':
+            order_by = "asc"
+        elif order_by_value == '2':
+            order_by = "desc"
+        elif order_by_value == '3':
+            order_by = "year_asc"
+        elif order_by_value == '4':
+            order_by = "year_desc"
+        elif order_by_value == '5':
+            order_by = "atas_2000"
+        elif order_by_value == '6':
+            order_by = "bawah_2000"
+        else:
+            order_by = request.GET.get('order_by', 'asc')
+    else:
+        order_by = request.GET.get('order_by', 'asc')
+        
+    sorted_books = search_katalog(last_searched, page_num,order_by)
+    
+    return HttpResponse(serializers.serialize('json',sorted_books))
