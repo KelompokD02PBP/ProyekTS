@@ -20,5 +20,8 @@ urlpatterns = [
     path('get-username/',get_username , name="get_username"),
     path('sort_books_search/<int:page_num>/<str:order_by>/',sort_books_ajax_search,name="sort_books_search"),
     path('ajax/<int:page_num>/',sort_main_ajax,name="sort_main_ajax"),
+<<<<<<< HEAD
     path('ajaxsearch/<int:page_num>/',sort_main_ajax_search,name="sort_main_ajax_search"),
+=======
+>>>>>>> a2ea243a5a202c10ad59a7f86b9e18e497f18c88
 ]
