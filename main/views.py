@@ -196,10 +196,6 @@ def get_katalog(page_num,order_by):
 
     return result
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 5eafa6a42a44723031a59879e7d010e168e593a1
 def get_liked_books(user) :
     likes = []
     if user:
@@ -209,11 +205,6 @@ def get_liked_books(user) :
     
     return likes
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 5eafa6a42a44723031a59879e7d010e168e593a1
 '''
 membuat daftar yang dicari
 '''
@@ -339,7 +330,6 @@ def like_dislike_ajax(request):
 
         return HttpResponse(serializers.serialize('json',likes))
     return HttpResponseNotFound()
-<<<<<<< HEAD
 
 @csrf_exempt
 def update_profile(request):
@@ -456,5 +446,3 @@ def sort_main_ajax_search(request,page_num):
     sorted_books = search_katalog(last_searched, page_num,order_by)
     
     return HttpResponse(serializers.serialize('json',sorted_books))
-=======
->>>>>>> 5eafa6a42a44723031a59879e7d010e168e593a1
