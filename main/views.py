@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseNotFound
 from django.urls import reverse
 
+from django.http import JsonResponse
 from katalog.models import Book, AppUser
 from katalog.views import search_book2
 from .models import Like
@@ -27,6 +28,7 @@ def show_main(request):
         if request.user.id !=None: #Kalo udh login bisa liat halaman
             context['page_num']=1
             context['books']=get_katalog(1)
+            context['likes']=get_liked_books(request.user)
 
     return render(request, "main.html", context)
 
@@ -36,6 +38,7 @@ def show_main_page(request, page_num):
     if request.user:
         context['name'] = request.user.username
         context['books'] = get_katalog(page_num)
+        context['likes']=get_liked_books(request.user)
         context['page_num'] = page_num
 
     return render(request, "main.html", context)
@@ -123,6 +126,18 @@ def get_katalog(page_num):
         result+=[books[i]]
         
     return result
+
+
+def get_liked_books(user) :
+    likes = []
+    if user:
+        # Mengambil book yang telah dilike oleh user
+        liked_books = Like.objects.filter(user = user).order_by('-timestamp')
+        for like in liked_books: likes.append(like.book)
+    
+    return likes
+
+
 
 '''
 membuat daftar yang dicari
