@@ -24,7 +24,9 @@
 
                 <input style="--bs-btn-hover-border-color: black; --bs-btn-border-color: black;" class="btn login_btn mb-3" type="submit" value="Login">
             </form>
-
+            {% for message in messages %}
+        <p>{{message}}</p>
+    {% endfor %}
             <p>Don't have an account yet? <a href="{% url 'main:register' %}">Register Now</a></p>
         </div>
     </div>

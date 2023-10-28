@@ -157,7 +157,6 @@ def login_user(request):
             login(request, user)
             response = HttpResponseRedirect(reverse("main:show_main_page", kwargs={'page_num':1}))
             response.set_cookie('last_login', str(datetime.datetime.now()), max_age=10000)
-            messages.success(request, 'Hello ' + user.username + "!")
             return response
         else:
             messages.info(request, 'Sorry, incorrect username or password. Please try again.')
