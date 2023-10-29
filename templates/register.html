@@ -25,6 +25,9 @@
                 </tr>  
             </table>  
         </form>
+        {% for message in messages %}
+        <p>{{message}}</p>
+    {% endfor %}
 
     <p class="text-center">Already have an account? <a href="{% url 'main:login' %}">Login</a></p>
 </div>

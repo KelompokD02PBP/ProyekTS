@@ -181,6 +181,7 @@ def get_katalog(page_num,order_by):
         books = Book.objects.all().order_by("-title")
     elif order_by == "year_asc":
         books = Book.objects.all().order_by("year_of_publish")
+        
     elif order_by == "year_desc":
         books = Book.objects.all().order_by("-year_of_publish")
     elif order_by == "atas_2000":
@@ -339,7 +340,6 @@ def update_profile(request):
 
         #Jika username taken by another person
         if(len(already_exist)!=0 and already_exist[0].pk != profile.pk):
-            messages.info(request, 'Sorry, username taken')
             return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
         
         #Jika bukan email
