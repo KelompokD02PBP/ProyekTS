@@ -45,7 +45,7 @@
             fetch("{% url 'main:get_comments_ajax' %}", {
                 method: "POST",
                 body: form
-            }).then((res) => res.json()).then(() => getComments({{book.pk}})).then(() => refreshComments({{book.pk}}))
+            }).then(() => getComments({{book.pk}})).then(() => refreshComments({{book.pk}}))
         }
 
         /*
@@ -146,7 +146,7 @@
             fetch("{% url 'main:add_comment_ajax' %}", {
                 method: "POST",
                 body: new FormData(form)
-            }).then(res => res.json()).then((data) => {
+            }).then((data) => {
                 console.log("Comment added successfully:", data); refreshComments(bookIdComment); form.reset})
 
             console.log("abis manggil url")
@@ -166,8 +166,8 @@
 
             comments.forEach((com) => {
                 htmlString += `\n<tr>
-                <td>${com.user}</td>
-                <td>${com.comment}</td>
+                <td>${com.fields.user}</td>
+                <td>${com.fields.comment}</td>
             </tr>` 
             })
 
@@ -175,7 +175,7 @@
         }
         
         document.getElementById("add-comment-btn").onclick = addComment(bookIdComment)
-        
+
         refreshComments(bookIdComment)
     </script>
 
