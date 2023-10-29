@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <content style="color: white;">
+
     <h2>PROFILE</h2>
     {% for m in messages %}
         <p>{{m}}</p>
@@ -9,7 +11,7 @@
     {% if profile.profile_picture %}
         <img id="profile_picture" style="width:20%; height:20%" src={{profile.profile_picture.url}} alt="profile"/>
     {% else %}
-        <img id="profile_picture" style="width:160px; height:160px" src="https://i.imgur.com/1Dyglmx.png" alt="profile"/>
+        <img id="profile_picture" style="width:20%; height:20%" src="https://i.imgur.com/1Dyglmx.png" alt="profile"/>
     {% endif %}
     
     <br/>
@@ -52,6 +54,7 @@
             </div>
         </div>
     </div>
+    
     {% if self_profile %}
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Update Profile</button>
     {% endif %}
@@ -62,10 +65,11 @@
     {% for like in books_you_like %}
         <a href="{% url 'main:book_review' like.book.pk %}">{{like.book.title}}</p>
     {% endfor %}
-
+    
+    </content>
     <script>
         async function refresh_profile(data){
-            //console.log(data)
+            console.log(JSON.stringify(data))
             // data.forEach(profile=>{
             //     //console.log(profile.fields.email)
             //     document.getElementById("email").innerHTML=`Email : ${profile.fields.email}`
@@ -104,7 +108,6 @@
 
             //console.log("after fetch")
             document.getElementById("form").reset()
-            return false
         }
     </script>
 {% endblock content%}

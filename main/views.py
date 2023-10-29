@@ -25,6 +25,13 @@ from PIL import Image
 Image.MAX_IMAGE_PIXELS = 1000000
 
 from re import match
+from random import choice
+
+def show_landing(request):
+    context = {
+        "book": choice(Book.objects.all())
+    }
+    return render(request, "landing.html", context)
 
 def show_main(request):
     context = {}
@@ -76,13 +83,12 @@ def show_main_page(request, page_num):
 
     return render(request, "main.html", context)
 
+
 '''
 Show main jika search
 '''
 books_last_searched=[] #simpen search sebelumnya biar bisa next/prior page dengan cepat
 last_searched="" #simpen kata yang di search terakhir
-
-
 def show_main_search(request, page_num):
     global books_last_searched
     global last_searched
@@ -128,6 +134,8 @@ def show_main_search(request, page_num):
     #   
     return render(request, "main.html", context)
 
+
+
 def register(request):
     user_form = UserCreationForm()
     profile_form = ProfileUserForm()
@@ -145,7 +153,6 @@ def register(request):
     
     context = {'user_form':user_form, 'profile_form':profile_form}
     return render(request, 'register.html', context)
-
 
 def login_user(request):
     if request.method == 'POST':
@@ -165,7 +172,7 @@ def login_user(request):
 
 def logout_user(request):
     logout(request)
-    response = HttpResponseRedirect(reverse('main:show_main'))
+    response = HttpResponseRedirect(reverse('main:show_landing'))
     response.delete_cookie('last_login')
     return response
 
@@ -262,11 +269,15 @@ def show_profile(request, user_id):
     profile = ProfileUser.objects.get(user__pk=user_id)
     books_you_like = Like.objects.filter(user__pk=user_id)
     print("books", profile.user.username ,"person like like", books_you_like)
-    context = {"profile":profile}
-    context['name']=request.user.username
-    context['books_you_like']=books_you_like
-    context['self_profile']=request.user==profile.user
-    context['user_id']=user_id
+    
+    context = {
+        "profile": profile,
+        "name": request.user.username,
+        "books_you_like": books_you_like,
+        "self_profile": request.user==profile.user,
+        "user_id": user_id,
+    }
+    
     print(context['self_profile'])
     
     return render(request, "profile.html", context)
@@ -306,7 +317,7 @@ def see_like_ajax(request):
         likes = Like.objects.filter(book=book)
         # print("likes", type(likes))
 
-        return HttpResponse(serializers.serialize('json',likes))
+        return HttpResponse(serializers.serialize('json',likes), content_type="application/json")
     return HttpResponseNotFound()
 
 #Function untuk mengetahui apakah user dalam kondisi like atau tidak terhadap buku
@@ -318,7 +329,7 @@ def like_dislike_ajax(request):
         book = Book.objects.get(pk=id)
         likes = Like.objects.filter(book=book, user = request.user)
 
-        return HttpResponse(serializers.serialize('json',likes))
+        return HttpResponse(serializers.serialize('json',likes), content_type="application/json")
     return HttpResponseNotFound()
 
 @csrf_exempt
@@ -339,7 +350,7 @@ def update_profile(request):
 
         #Jika username taken by another person
         if(len(already_exist)!=0 and already_exist[0].pk != profile.pk):
-            messages.info(request, 'Sorry, username taken')
+            messages.info(request, 'Username taken')
             return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
         
         #Jika bukan email
@@ -366,7 +377,7 @@ def update_profile(request):
         profile.save()
 
         print(profile)
-        return HttpResponse(serializers.serialize('json',[profile]))
+        return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
     return HttpResponseNotFound()
 
 @csrf_exempt
@@ -374,16 +385,16 @@ def get_username(request):
     id = request.POST.get("id")
     print("id in getusername",id)
     user = User.objects.filter(pk=id)
-    return HttpResponse(serializers.serialize('json',user))
+    return HttpResponse(serializers.serialize('json',user), content_type="application/json")
 
 def sort_books_ajax(request,page_num,order_by):
     sorted_books = get_katalog(page_num,order_by)
-    return HttpResponse(serializers.serialize('json',sorted_books))
+    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
 
 @csrf_exempt
 def sort_books_ajax_search(request,page_num,order_by):
     sorted_books = search_katalog(last_searched, page_num,order_by)
-    return HttpResponse(serializers.serialize('json',sorted_books))
+    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
 
 @csrf_exempt
 def sort_main_ajax(request,page_num):
@@ -409,7 +420,7 @@ def sort_main_ajax(request,page_num):
         
     sorted_books = get_katalog(page_num,order_by)
     
-    return HttpResponse(serializers.serialize('json',sorted_books))
+    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
 
 @csrf_exempt
 def sort_main_ajax_search(request,page_num):
@@ -435,4 +446,10 @@ def sort_main_ajax_search(request,page_num):
         
     sorted_books = search_katalog(last_searched, page_num,order_by)
     
-    return HttpResponse(serializers.serialize('json',sorted_books))
+    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
+
+
+@csrf_exempt
+def get_random_book_ajax(request):
+    book = choice(Book.objects.all())
+    return HttpResponse(serializers.serialize('json',[book]), content_type="application/json")

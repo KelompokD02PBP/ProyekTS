@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block meta %}
+<style>
+    content {
+        color: white;
+        
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    #random-book img#card-image {
+        animation-duration: 0.4s;
+        animation-timing-function: ease-in-out;
+    }
+</style>
+{% endblock meta %}
+
+{% block content %}
+<content>
+    <section id="text-desc">
+        <h3>Readify, the book review app.</h3>
+        <p style="padding-left: 5px;">
+            You can do stuff in this app.
+        </p>
+
+        <p style="padding-left: 5px;">
+            Features:
+            <ul>
+                <li>Search book</li>
+                <li>Favorite.</li>
+                <li>Book sorting.</li>
+                <li>Comments.</li>
+            </ul>
+        </p>
+    </section>
+
+    <section id="random-book" style="padding:0px 100px; min-height: max-content;">
+        <div class="card" style="width: 18rem;background-color: #1a1a1a;color: #ffffff;">
+            <div style="height: 250px;display: flex; justify-content: center;" id="img-container">
+                <img class="card-img-top" id="card-image" src="{{ book.image_url_l }}" alt="Card image cap"
+                    style="height: 250px; object-fit: cover;">
+            </div>
+            <div class="container-card" style="display: flex;justify-content: space-between;"></div>
+            <div class="card-body" style="display: flex; flex-direction: column;">
+                <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                    <p style="font-size: larger;" id="card-title-text">{{ book.title }}</p>
+                </h5>
+                <p class="card-text" id="card-year-text" style="font-size: 16px;">Published {{ book.year_of_publish }}</p>
+                <p class="card-text" id="card-pub-text" style="font-size: 16px;">by {{ book.publisher }}</p>
+            </div>
+            <div style="align-self: flex-end;margin:10px">
+                <a href="{% url 'main:login' %}" class="btn btn-secondary" style="font-size: 16px;">Login to See More</a>
+            </div>
+        </div>
+        <p style="text-align: center;">
+            One of over 100 books available to see.
+        </p>
+    </section>
+</content>
+
+<footer style="text-align: left;color: white;">
+    <hr color="white">
+    <p>
+        Created by Kelompok D02.
+    </p>
+</footer>
+
+<script>
+    const randombook = setInterval(async function() {
+        console.log("hello")
+        const resp = await fetch(`/randombookapi/`, {})
+        const data = await resp.json()
+
+        document.getElementById("card-image").setAttribute("src", data[0].fields.image_url_l)
+        document.getElementById("card-title-text").innerHTML = `${data[0].fields.title}`
+        document.getElementById("card-year-text").innerHTML = `Published ${data[0].fields.year_of_publish}`
+        document.getElementById("card-pub-text").innerHTML = `by ${data[0].fields.publisher}`
+        
+    }, 10000)
+</script>
+{% endblock content %}
