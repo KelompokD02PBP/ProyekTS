@@ -4,7 +4,7 @@ from main.views import *
 app_name = 'main'
 
 urlpatterns = [
-    path('', show_main, name='show_main'),
+    path('', show_landing, name='show_landing'),
     path('<int:page_num>/', show_main_page, name='show_main_page'),
     path('search/<int:page_num>/', show_main_search, name='show_main_search'),
     path('register/', register, name="register"),
@@ -13,6 +13,7 @@ urlpatterns = [
     path('book/<int:id>/', book_review , name="book_review"),
     # path('my-profile/', show_self_profile , name="my_profile"),
     path('profile/<int:user_id>', show_profile , name="profile"),
+    
     path('add-like/', add_like_ajax , name="add_like_ajax"),
     path('see-like/', see_like_ajax , name="see_like_ajax"),
     path('like-dislike/', like_dislike_ajax , name="like_dislike"),
@@ -24,4 +25,5 @@ urlpatterns = [
 
     path('comment/',add_comment_ajax , name="add_comment"),
     path('get-comment/',get_comments_ajax , name="get_comments_ajax"),
+    path('randombookapi/', get_random_book_ajax, name="get_random_book_ajax")
 ]
