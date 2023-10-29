@@ -55,17 +55,16 @@
                                 <p class="card-text" id="card-year-text" style="font-size: 16px;">Published {{ book.year_of_publish }}</p>
                                 <p class="card-text" id="card-pub-text" style="font-size: 16px;">by {{ book.publisher }}</p>
                             </div>
-                            <div style="align-self: flex-end;margin:10px">
-                                <a href="{% url 'main:login' %}" class="btn btn-secondary" style="font-size: 16px;">Login to See More</a>
-                            </div>
                         </div>
                     </div>
                     {% endfor %}
-                </div>    
+                </div>
+                <div style="text-align: right; margin-right:20px; margin-bottom: 10px;margin-top: 10px;">
+                    <a href="{% url 'main:login' %}" class="btn btn-secondary" style="font-size: 16px;">Login to See More</a>
+                </div>
             </div>
         </div>
-        
-        <p style="text-align: center;">
+        <p style="text-align: left;">
             Some of over 100 books available to see.
         </p>
     </section>
