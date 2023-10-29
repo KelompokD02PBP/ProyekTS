@@ -12,8 +12,10 @@
             <h4>{{book.title}}</h4>
             <h4>Written by {{book.author}}</h4>
             <p>Published in {{book.year_of_publish}}</p>
-            <button id="like" onclick="like({{book.pk}})" class="btn btn-link"><i class="far fa-thumbs-up fa-2x" id="like-icon"></i></button>
-            <div id="likedBy" style="margin-top: 20px;"></div>
+            <div style="display:flex;">
+                <button id="like" onclick="like({{book.pk}})" class="btn btn-link"><i class="far fa-thumbs-up fa-2x" id="like-icon"></i></button>
+                <div id="likedBy" style="margin-top: 20px;"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -58,6 +60,7 @@
     
     async function build_like(id) {
         var likes = await see_like(id);
+        /*
         var res = `<table class="table table-striped">
             <thead>
                 <tr>
@@ -68,9 +71,6 @@
             </thead>
             <tbody>`;
 
-
-
-
         for (const l of likes) {
             const username = await get_username(l.fields.user);
             console.log();
@@ -78,10 +78,13 @@
             res += "<td><a style=\"color: #ecbe17\" href=\"{% url 'main:profile' user_id=123 %}\">".replace("123", l.fields.user)  + username[0].fields.username  + "</a></td>";
             res += "</tr>";
         }
-
-
-
-        res += "</tbody></table>";
+        */
+        var res = ""
+        var counter=0;
+        for (const l of likes) {
+            counter+=1;
+        }
+        res = res+counter
         document.getElementById('likedBy').innerHTML = res;
     }
 
