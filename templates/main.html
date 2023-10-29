@@ -1,4 +1,4 @@
-    {% extends 'base.html' %}
+{% extends 'base.html' %}
 
     {% block content %}
     
@@ -47,7 +47,7 @@
      <form style="margin-top: 20px;" onsubmit="return false;" id="sortFormSearch">
         {% csrf_token %}
         <div class="input-group" style="margin-bottom: 10px;">
-            <select class="custom-select" name="order_by" id="inputGroupSelect05"">
+            <select class="custom-select" name="order_by" id="inputGroupSelect05">
                 <option selected>Choose...</option>
                 <option value="1">Sort A-Z</option>
                 <option value="2">Sort Z-A</option>
@@ -64,33 +64,13 @@
     {% endif %}
     {% endif %}
 
-{% if likes|length > 0 %}
-<div class="overflow-x-auto">
-    <h2 style="color: white;">Liked Books</h2>
-    <div class="scrolling-container" style="width: 100%; overflow-x: auto;"> 
-        <div class="d-flex"> 
-            {% for book in likes %}
-                <div class="card" style="flex: 0 0 calc(33.33% - 20px); margin: 10px; width: 18rem;">
-                    <div style="height: 250px; display: flex; justify-content: center;">
-                        <img class="card-img-top" src="{{ book.image_url_l }}" alt="Card image cap" style="height: 250px; object-fit: cover;">
-                    </div>
-                    <div class="container-card" style="display: flex; justify-content: space-between;"></div>
-                    <div class="card-body" style="display: flex; flex-direction: column;">
-                        <h5 class="card-title" style="font-size: 16px; margin: 0;">
-                            <p style="font-size: larger;">{{ book.title }}</p>
-                        </h5>
-                        <p class="card-text" style="font-size: 14px;">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                    </div>
-                    <div style="align-self: flex-end; margin: 10px;">
-                        <a href="{% url 'main:book_review' book.pk %}" class="btn btn-primary" style="font-size: 16px;">See More</a>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
+    {% if user.is_authenticated %}
+    <div class="mt-5" style="overflow: auto">
+      <h3 class="text-white h5">Liked Books</h3>
+      <div class="d-flex gap-3 w-100" id="likes"></div>
     </div>
-</div>
-<hr>
-{% endif %}
+    <hr />
+    {% endif %}
 
     <div id="katalog" style="display: flex; flex-wrap: wrap;">
         {% if books %}
@@ -140,11 +120,14 @@
     {% endif %}
     </div>
 
+{% endblock content %}
 
-
-    {%if user.is_authenticated%}
+{% block js_page %} {% if user.is_authenticated %}
 
     <script>
+        $(document).ready(function () {
+            load_liked_books();
+          });
         
         async function handleFormSubmitSearch(){
             const form = document.querySelector('#sortFormSearch');
@@ -209,8 +192,6 @@
         document.getElementById("button_submit_search").onclick = handleFormSubmitSearch
         
 
-        
-        
         async function handleFormSubmit(){
             console.log("masukk")
             const form = document.querySelector('#sortForm');
@@ -273,7 +254,40 @@
         }
         document.getElementById("button_submit").onclick = handleFormSubmit
 
+        function load_liked_books() {
+            $.ajax({
+              type: "POST",
+              url: "{% url 'main:get_liked_books' %}",
+              success: function (response) {
+                if (response.status === "success") {
+                  // Update daftar buku di antarmuka pengguna dengan data yang diterima
+                  const booksContainer = $("#likes");
+                  booksContainer.empty(); // Kosongkan daftar buku sebelum memasukkan buku yang baru dimuat
+                  $.each(JSON.parse(response.books), function (index, book) {
+                    // Tambahkan buku ke daftar buku
+                    booksContainer.append(`<div class="col-10 col-md-4 col-lg-3">
+                                  <div class="card h-100">
+                                      <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover" />
+                                      <div class="card-body d-flex flex-column gap-2">
+                                          <h5 class="card-title">${book.fields.title}</h5>
+                                          <p class="card-text">
+                                          Some quick example text to build on the card title and make up the bulk of the card's content.
+                                          </p>
+                                          <a href="book/${book.pk}" class="btn btn-primary ms-auto mt-auto">See More</a>
+                                      </div>
+                                  </div>
+                              </div>`);
+                  });
+                } else {
+                  console.log(response.message);
+                }
+              },
+              error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+              },
+            });
+          }
     </script>
 {% endif %}
             
-{% endblock content %}
+{% endblock js_page %}
