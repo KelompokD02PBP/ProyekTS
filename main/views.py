@@ -1,6 +1,6 @@
 import datetime
 
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -10,9 +10,10 @@ from django.urls import reverse
 from katalog.models import Book
 from django.contrib.auth.decorators import login_required
 from katalog.views import search_book2
-from .models import Like, ProfileUser
+from .models import Like, ProfileUser, Comment
 
-from .forms import ProfileUserForm
+from .forms import ProfileUserForm, CommentForm
+from django.utils.html import escape
 
 from django.core import serializers
 from django.core.validators import validate_email
@@ -436,3 +437,45 @@ def sort_main_ajax_search(request,page_num):
     sorted_books = search_katalog(last_searched, page_num,order_by)
     
     return HttpResponse(serializers.serialize('json',sorted_books))
+@csrf_exempt
+def get_comments_ajax(request):
+    if request.method == 'POST':
+        id = request.POST.get("id")
+        book = Book.objects.get(pk=id)
+        comments = Comment.objects.filter(book=book)
+        return HttpResponse(serializers.serialize('json', comments))
+
+# @csrf_exempt
+# def add_comment_ajax(request):
+#     if request.method == 'POST':
+#         id = request.POST.get("id")
+#         book = Book.objects.get(pk=id)
+#         user = request.user
+#         comment = request.POST.get("comment")
+
+#         new_comment = Comment(book=book, user=user, comment=comment)
+#         new_comment.save()
+#         return HttpResponse(b"CREATED", status=201)
+#     return HttpResponseNotFound()
+
+@csrf_exempt
+def add_comment_ajax(request):
+    print("aaa")
+    if request.method == 'POST':
+        print("masuk request==post")
+        # if request.POST.is_valid():
+            
+        comment = escape(request.POST.get('comment'))
+        print("comment",comment, type(comment))
+        id = request.POST.get("id")
+        print("id", id)
+        book = Book.objects.get(pk=id)
+        user = request.user
+
+        book = get_object_or_404(Book, pk=id)
+
+        new_comment = Comment(book=book, user=user, comment=comment)
+        print(new_comment)
+        new_comment.save()
+        return HttpResponse(b"CREATED", status=201)
+    return HttpResponseNotFound()

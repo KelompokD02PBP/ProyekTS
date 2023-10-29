@@ -4,7 +4,7 @@
     
     {% if page_num != -1 %}
     <h2 style="color: #ecbe17;" > Hello, {{name|capfirst}}! </h2>
- 
+
     {% if from_search %}
     <a href="{% url 'main:show_main_page' 1 %}">
         <button>Home</button>
@@ -47,7 +47,7 @@
      <form style="margin-top: 20px;" onsubmit="return false;" id="sortFormSearch">
         {% csrf_token %}
         <div class="input-group" style="margin-bottom: 10px;">
-            <select class="custom-select" name="order_by" id="inputGroupSelect05"">
+            <select class="custom-select" name="order_by" id="inputGroupSelect05">
                 <option selected>Choose...</option>
                 <option value="1">Sort A-Z</option>
                 <option value="2">Sort Z-A</option>

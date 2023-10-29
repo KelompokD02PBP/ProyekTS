@@ -20,5 +20,8 @@ urlpatterns = [
     path('get-username/',get_username , name="get_username"),
     path('sort_books_search/<int:page_num>/<str:order_by>/',sort_books_ajax_search,name="sort_books_search"),
     path('ajax/<int:page_num>/',sort_main_ajax,name="sort_main_ajax"),
-    path('ajaxsearch/<int:page_num>/',sort_main_ajax_search,name="sort_main_ajax_search")
+    path('ajaxsearch/<int:page_num>/',sort_main_ajax_search,name="sort_main_ajax_search"),
+
+    path('comment/',add_comment_ajax , name="add_comment"),
+    path('get-comment/',get_comments_ajax , name="get_comments_ajax"),
 ]
