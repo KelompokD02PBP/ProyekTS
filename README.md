@@ -1,4 +1,7 @@
-# 💻 ProyekTS
+# 💻 Readify
+
+Website: [http://readify-d02-tk.pbp.cs.ui.ac.id](http://readify-d02-tk.pbp.cs.ui.ac.id)
+
 ## 🏫 Proyek Tengah Semester dari kelompok D02 PBP
 Nama-nama anggota kelompok
 1. Venedict Chen - 2206024436
