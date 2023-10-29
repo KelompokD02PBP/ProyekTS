@@ -18,4 +18,7 @@ urlpatterns = [
     path('like-dislike/', like_dislike_ajax , name="like_dislike"),
     path('update-profile/',update_profile , name="update_profile"),
     path('get-username/',get_username , name="get_username"),
+
+    path('get-comment/',get_comments_ajax , name="get_comments_ajax"),
+    path('add-comment/',add_comment_ajax , name="add_comment_ajax"),
 ]

@@ -1,6 +1,6 @@
 import datetime
 
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -9,9 +9,9 @@ from django.urls import reverse
 
 from katalog.models import Book
 from katalog.views import search_book2
-from .models import Like, ProfileUser
+from .models import Like, ProfileUser, Comment
 
-from .forms import ProfileUserForm
+from .forms import ProfileUserForm, CommentForm
 
 from django.core import serializers
 
@@ -279,3 +279,41 @@ def get_username(request):
     print("id in getusername",id)
     user = User.objects.filter(pk=id)
     return HttpResponse(serializers.serialize('json',user))
+
+@csrf_exempt
+def get_comments_ajax(request):
+    if request.method == 'POST':
+        id = request.POST.get("id")
+        book = Book.objects.get(pk=id)
+        comments = Comment.objects.filter(book=book)
+        return HttpResponse(serializers.serialize('json', comments))
+
+# @csrf_exempt
+# def add_comment_ajax(request):
+#     if request.method == 'POST':
+#         id = request.POST.get("id")
+#         book = Book.objects.get(pk=id)
+#         user = request.user
+#         comment = request.POST.get("comment")
+
+#         new_comment = Comment(book=book, user=user, comment=comment)
+#         new_comment.save()
+#         return HttpResponse(b"CREATED", status=201)
+#     return HttpResponseNotFound()
+
+@csrf_exempt
+def add_comment_ajax(request):
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.cleaned_data['comment']
+            id = request.POST.get("id")
+            book = Book.objects.get(pk=id)
+            user = request.user
+
+            book = get_object_or_404(Book, pk=id)
+
+            new_comment = Comment(book=book, user=user, comment=comment)
+            new_comment.save()
+            return HttpResponse(b"CREATED", status=201)
+    return HttpResponseNotFound()
