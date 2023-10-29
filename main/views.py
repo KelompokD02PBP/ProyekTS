@@ -72,6 +72,7 @@ def show_main_page(request, page_num):
     else:
         order_by = request.GET.get('order_by', 'asc')
 
+    
     if request.user:
         context['name'] = request.user.username
         if page_num <= 0:
@@ -163,7 +164,6 @@ def login_user(request):
             login(request, user)
             response = HttpResponseRedirect(reverse("main:show_main_page", kwargs={'page_num':1}))
             response.set_cookie('last_login', str(datetime.datetime.now()), max_age=10000)
-            messages.success(request, 'Hello ' + user.username + "!")
             return response
         else:
             messages.info(request, 'Sorry, incorrect username or password. Please try again.')
@@ -188,6 +188,7 @@ def get_katalog(page_num,order_by):
         books = Book.objects.all().order_by("-title")
     elif order_by == "year_asc":
         books = Book.objects.all().order_by("year_of_publish")
+        
     elif order_by == "year_desc":
         books = Book.objects.all().order_by("-year_of_publish")
     elif order_by == "atas_2000":
