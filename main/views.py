@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseNotFound
+from django.http import HttpResponseRedirect, HttpResponse, HttpResponseNotFound, JsonResponse
 from django.urls import reverse
 
 from katalog.models import Book
@@ -21,6 +22,7 @@ from django.core.validators import validate_email
 from django.contrib.auth.models import User
 
 from django.views.decorators.csrf import csrf_exempt
+from .models import Like
 
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = 1000000
@@ -45,6 +47,7 @@ def show_main(request):
 
         if request.user.id !=None: #Kalo udh login bisa liat halaman
             context['page_num']=1
+            # context['likes']=get_liked_books(request.user)
             context['user_id']=request.user.pk
             context['books']=get_katalog(1,order_by=request.GET.get('order_by'))
 
@@ -203,7 +206,6 @@ def get_katalog(page_num,order_by):
 
     return result
 
-
 '''
 membuat daftar yang dicari
 '''
@@ -270,7 +272,7 @@ def show_profile(request, user_id):
     print(user_id)
     profile = ProfileUser.objects.get(user__pk=user_id)
     books_you_like = Like.objects.filter(user__pk=user_id)
-    print("books", profile.user.username ,"person like like", books_you_like)
+    # print("books", profile.user.username ,"person like like", books_you_like)
     
     context = {
         "profile": profile,
@@ -488,3 +490,20 @@ def add_comment_ajax(request):
 def get_random_book_ajax(request):
     book = choice(Book.objects.all())
     return HttpResponse(serializers.serialize('json',[book]), content_type="application/json")
+
+# Function untuk mendapatkan data buku yang sudah dilike
+@csrf_exempt
+def get_liked_books_ajax(request):
+    if request.method == 'POST':
+        books = Like.objects.filter(user = request.user).order_by('-timestamp')
+        
+        books = [like.book for like in books]
+
+        # Serialisasi data buku ke dalam format JSON
+        serialized_books = serializers.serialize('json', books)
+
+        # Kirim data buku sebagai respons JSON
+        return JsonResponse({'status': 'success', 'books': serialized_books})
+
+    # Jika metode permintaan tidak valid
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})

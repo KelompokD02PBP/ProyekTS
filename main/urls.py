@@ -25,5 +25,7 @@ urlpatterns = [
 
     path('comment/',add_comment_ajax , name="add_comment"),
     path('get-comment/',get_comments_ajax , name="get_comments_ajax"),
-    path('randombookapi/', get_random_book_ajax, name="get_random_book_ajax")
+    path('randombookapi/', get_random_book_ajax, name="get_random_book_ajax"),
+
+   path('get-liked-books/', get_liked_books_ajax, name="get_liked_books"),
 ]
