@@ -1,50 +1,306 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2> Hello world! </h2>
-
-{% if messages %}  
-    <ul>   
-        {% for message in messages %}  
-            <li>{{ message }}</li>  
-            {% endfor %}  
-    </ul>
-{% endif %}
-
 
 {% if page_num != -1 %}
+<h2 style="color: #ecbe17;" > Hello, {{name|capfirst}}! </h2>
 
-    <form name="search_bar" method ="GET" action="{% url 'main:show_main_search' 1 %}">
+    {% if from_search %}
+    <a href="{% url 'main:show_main_page' 1 %}">
+        <button style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">Home</button>
+    </a>
+    {% else %}
+    <form style="color: #ffffff"  name="search_bar" method="GET" action="{% url 'main:show_main_search' 1 %}">
         <label for="search_bar">Search</label>
-        <input type="text" id="search_bar" name="search_bar"><br><br>
-        <input type="submit">
+        <input style="border-radius: 10px;margin-top: 10px;" type="text" id="search_bar" name="search_bar"><br><br>
+        <input  style="background-color: #dfdfdf;" class="btn" type="submit"onmouseover="this.style.backgroundColor='#808080'" onmouseout="this.style.backgroundColor='#dfdfdf'">
     </form>
     <hr>
-
-    <div id="katalog">
-        {% for book in books %}
-            <img src={{book.image_url_s}} alt ={{book.title}}>
-            <a href="{% url 'main:book_review' book.pk %}">{{book.title}}</a>
-            <br/>
-        {% endfor %} 
-    </div>
-    <!-- Kalo gk pake search data bukunya dari all -->
-    {% if not from_search %}
-        <a href="{% url 'main:show_main_page' page_num|add:"-1"  %}">
-            <button>PrevPage</button>
+    {% if page_num == 1 %}
+        <form onsubmit="return false;" id="sortForm">
+            {% csrf_token %}
+            <div class="input-group" style="margin-bottom: 10px;">
+                <select class="custom-select" name="order_by" id="inputGroupSelect04">
+                    <option selected>Choose...</option>
+                    <option value="1">Sort A-Z</option>
+                    <option value="2">Sort Z-A</option>
+                    <option value="3">Sort Year Asc</option>
+                    <option value="4">Sort Year Desc</option>
+                    <option value="5">Filter 2000 and Up</option>
+                    <option value="6">Filter Before 2000</option>
+                </select>
+                <div class="input-group-append">
+                    <button onmouseover="this.style.backgroundColor='#808080'" onmouseout="this.style.backgroundColor='#000000'" id="button_submit" class="btn btn-outline-secondary" type="submit">Sort & Filter</button>
+                </div>
+            </div>
+        </form>
+    {% else %}
+        <a href="{% url 'main:show_main_page' 1 %}?order_by={{ request.GET.order_by }}">
+            <button>Home</button>
         </a>
-        <a href="{% url 'main:show_main_page' page_num|add:"+1"  %}">
-            <button>NextPage</button>
-        </a>
-    {% endif %}
-    <!-- Kalo pake search data bukunya dari hasil filter -->
-    {% if from_search %}
-            <a href="{% url 'main:show_main_search' page_num|add:"-1"%}">
-                <button>PrevPageSearch</button>
-            </a>
-            <a href="{% url 'main:show_main_search' page_num|add:"+1"%}">
-                <button>NextPageSearch</button>
-            </a>
     {% endif %}
 {% endif %}
+
+{% if from_search %}
+    {% if page_num == 1 %}
+        <form style="margin-top: 20px;" onsubmit="return false;" id="sortFormSearch">
+        {% csrf_token %}
+        <div class="input-group" style="margin-bottom: 10px;">
+            <select class="custom-select" name="order_by" id="inputGroupSelect05">
+                <option selected>Choose...</option>
+                <option value="1">Sort A-Z</option>
+                <option value="2">Sort Z-A</option>
+                <option value="3">Sort Year Asc</option>
+                <option value="4">Sort Year Desc</option>
+                <option value="5">Filter 2000 and Up</option>
+                <option value="6">Filter Before 2000</option>
+            </select>
+            <div class="input-group-append">
+                <button id="btn_submit_search" class="btn btn-outline-secondary" type="submit">Sort & Filter</button>
+            </div>
+        </div>
+    </form>
+    {% endif %}
+{% endif %}
+
+<div id="katalog" style="display: flex; flex-wrap: wrap;">
+    {% if books %}
+        {% for book in books %}
+        <div class="card" style="width: 18rem; margin: 10px;background-color: #1a1a1a;color: #ffffff;">
+            <div style="height: 250px;display: flex; justify-content: center;">
+                <img class="card-img-top" src="{{ book.image_url_l }}" alt="Card image cap"
+                    style="height: 250px; object-fit: cover;">
+            </div>
+            <div class="container-card" style="display: flex;justify-content: space-between;"></div>
+            <div class="card-body" style="display: flex; flex-direction: column;">
+                <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                    <p style="font-size: larger;">{{ book.title }}</p>
+                </h5>
+                <p class="card-text" style="font-size: 16px;">Published {{ book.year_of_publish }}</p>
+                <p class="card-text" style="font-size: 16px;">by {{ book.publisher }}</p>
+            </div>
+            <div style="align-self: flex-end;margin:10px">
+                <a  href="{% url 'main:book_review' book.pk %}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <h4 style="margin-top: 20px;margin-bottom: 20px;">There are no books left...</h4>
+    {% endif %}
+</div>
+
+<div style="display: flex; flex-direction: row; align-items: center; margin-top: 20px; margin-bottom: 40px; justify-content: center;gap: 20px;">
+    
+    <div style="display: flex; flex-direction: row; align-items: center; margin-top: 20px; margin-bottom: 30px; justify-content: center;gap: 20px;">
+        {% if not from_search %}
+        <a id="prevPageLink" href="{% url 'main:show_main_page' page_num|add:" -1" %}?order_by={{request.GET.order_by|default:"asc" }}">
+            <button style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">PrevPage</button>
+        </a>
+        <a id="nextPageLink" href="{% url 'main:show_main_page' page_num|add:" 1" %}?order_by={{request.GET.order_by|default:"asc" }}">
+            <button style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">NextPage</button>
+        </a>
+        {% endif %}
+    
+        {% if from_search %}
+        <a id="prevPageSearchLink" href="{% url 'main:show_main_search' page_num|add:" -1" %}?order_by={{request.GET.order_by|default:"asc" }}">
+            <button style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">PrevPageSearch</button>
+        </a>
+        <a id="nextPageSearchLink" href="{% url 'main:show_main_search' page_num|add:" 1" %}?order_by={{request.GET.order_by|default:"asc" }}">
+            <button style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">NextPageSearch</button>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+    </div>
+
+    {% if user.is_authenticated %}
+        <div class="mt-5" style="overflow: auto">
+        <h1 class="text-white h5" style="font-size: x-large;">Liked Books</h1>
+        <div class="d-flex gap-3 w-100" id="likes" style="display: flex; flex-wrap: wrap;"></div>
+        </div>
+        <hr />
+    {% endif %}
+
+
+
+
+{% block js_page %} 
+{% if user.is_authenticated %}
+
+    <script>
+        $(document).ready(function () {
+            load_liked_books();
+          });
+        
+        async function handleFormSubmitSearch(){
+            const formSearch = document.querySelector('#sortFormSearch');
+            console.log("masuksini")
+            const selectedValueSearch = document.getElementById('inputGroupSelect05').value;
+            let orderBySearch;
+
+            if (selectedValueSearch === '1') {
+                orderBySearch = 'asc';
+            } else if (selectedValueSearch === '2') {
+                orderBySearch = 'desc';
+            } else if (selectedValueSearch === '3') {
+                orderBySearch = 'year_asc';
+            } else if (selectedValueSearch === '4') {
+                orderBySearch = 'year_desc';
+            } else if (selectedValueSearch === '5') {
+                orderBySearch = 'atas_2000';
+            } else if (selectedValueSearch === '6') {
+                orderBySearch = 'bawah_2000';
+            }
+
+            const responseSearch = await fetch(`/ajaxsearch/1/`, {
+                method: 'POST',
+                body: new FormData(formSearch)
+            });
+            console.log("test")
+            console.log(responseSearch)
+
+            const sortedBooksSearch = await responseSearch.json();
+
+        let htmlString = "";
+
+            sortedBooksSearch.forEach((book) => {
+                htmlString += `
+                <div class="card" style="width: 18rem; margin: 10px;background-color: #1a1a1a;color: #ffffff;">
+                    <div style="height: 250px;display: flex; justify-content: center;">
+                        <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover;">
+                    </div>
+                    <div class="card-body" style="display: flex; flex-direction: column;">
+                        <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                            <p style="font-size: larger;">${book.fields.title}</p>
+                        </h5>
+                        <p class="card-text" style="font-size: 14px;">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    </div>
+                    <div style="align-self: flex-end;margin:10px">
+                        <a href="/book/${book.pk}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+                    </div>
+                </div>`;
+            });
+            handleOrderSearch(orderBySearch);
+            document.getElementById("katalog").innerHTML = htmlString;
+
+        }
+        
+        async function handleOrderSearch(orderBySearch) {
+            const prevPageSearchLink = document.getElementById('prevPageSearchLink');
+            const nextPageSearchLink = document.getElementById('nextPageSearchLink');
+            
+            prevPageSearchLink.href = `{% url 'main:show_main_search' page_num|add:"-1" %}?order_by=${orderBySearch}`;
+            nextPageSearchLink.href = `{% url 'main:show_main_search' page_num|add:"1" %}?order_by=${orderBySearch}`;
+        }
+        
+        async function handleFormSubmit(){
+            console.log("clicked")
+            const form = document.querySelector('#sortForm');
+            const selectedValue = document.getElementById('inputGroupSelect04').value;
+            let orderBy;
+
+        if (selectedValue === '1') {
+            orderBy = 'asc';
+        } else if (selectedValue === '2') {
+            orderBy = 'desc';
+        } else if (selectedValue === '3') {
+            orderBy = 'year_asc';
+        } else if (selectedValue === '4') {
+            orderBy = 'year_desc';
+        } else if (selectedValue === '5') {
+            orderBy = 'atas_2000';
+        } else if (selectedValue === '6') {
+            orderBy = 'bawah_2000';
+        }
+
+            const response = await fetch(`/ajax/1/`, {
+                method: 'POST',
+                body: new FormData(form)
+            });
+            console.log("test")
+            console.log(response)
+
+            const sortedBooks = await response.json();
+
+            let htmlString = "";
+
+            sortedBooks.forEach((book) => {
+                htmlString += `
+                <div class="card" style="width: 18rem; margin: 10px;background-color: #1a1a1a;color: #ffffff;">
+                    <div style="height: 250px;display: flex; justify-content: center;">
+                        <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover;">
+                    </div>
+                    <div class="card-body" style="display: flex; flex-direction: column;">
+                        <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                            <p style="font-size: larger;">${book.fields.title}</p>
+                        </h5>
+                        <p class="card-text" style="font-size: 14px;">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    </div>
+                    <div style="align-self: flex-end;margin:10px">
+                        <a href="/book/${book.pk}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+                    </div>
+                </div>`;
+            });
+            handleOrder(orderBy);
+            document.getElementById("katalog").innerHTML = htmlString;
+
+        }
+        async function handleOrder(orderBy){
+            const prevPageLink = document.getElementById('prevPageLink');
+            const nextPageLink = document.getElementById('nextPageLink');
+            
+            prevPageLink.href = `{% url 'main:show_main_page' page_num|add:"-1" %}?order_by=${orderBy}`;
+            
+            nextPageLink.href = `{% url 'main:show_main_page' page_num|add:"1" %}?order_by=${orderBy}`;
+        }
+        
+        var buttonSubmit = document.getElementById("button_submit");
+        var buttonSubmitSearch = document.getElementById("btn_submit_search");
+
+        if (buttonSubmit) {
+            buttonSubmit.onclick = handleFormSubmit;
+        }
+    
+        if (buttonSubmitSearch) {
+            buttonSubmitSearch.onclick = handleFormSubmitSearch;
+        }
+
+        function load_liked_books() {
+            $.ajax({
+              type: "POST",
+              url: "{% url 'main:get_liked_books' %}",
+              success: function (response) {
+                if (response.status === "success") {
+                  // Update daftar buku di antarmuka pengguna dengan data yang diterima
+                  const booksContainer = $("#likes");
+                  booksContainer.empty(); // Kosongkan daftar buku sebelum memasukkan buku yang baru dimuat
+                  $.each(JSON.parse(response.books), function (index, book) {
+                    // Tambahkan buku ke daftar buku
+                    booksContainer.append(`  <div class="card" style="width: 18rem; margin: 10px;">
+                        <div style="height: 250px;display: flex; justify-content: center;">
+                            <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover;">
+                        </div>
+                        <div class="card-body" style="display: flex; flex-direction: column;">
+                            <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                                <p style="font-size: larger;">${book.fields.title}</p>
+                            </h5>
+                            <p class="card-text" style="font-size: 14px;">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        </div>
+                        <div style="align-self: flex-end;margin:10px">
+                            <a href="/book/${book.pk}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+                        </div>
+                    </div>`);
+                  });
+                } else {
+                  console.log(response.message);
+                }
+              },
+              error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText);
+              },
+            });
+          }
+    </script>
+{% endif %}
+{% endblock js_page %}
 {% endblock content %}

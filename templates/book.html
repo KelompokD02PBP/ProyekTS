@@ -1,25 +1,195 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <p>ISBN: {{book.isbn}}</p>
-    <h2>{{book.title}}</h2>
-    <img src={{book.image_url_m}} alt={{book.title}}>
-    <h4>Written by {{book.author}}</h4>
-    <p>Published in {{book.year_of_publish}}</p>
+<div class="container" style="color: #ffffff; text-align: center; margin-bottom: 40px;">
+    <h1 style="margin-bottom: 60px;">Book Detail</h1>
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{book.image_url_l}}" alt="{{book.title}}" class="img-fluid" style="margin: 0 auto;">
+        </div>
+        <div class="col-md-6" style="text-align: left;">
+            <p>ISBN: {{book.isbn}}</p>
+            <h4>{{book.title}}</h4>
+            <h4>Written by {{book.author}}</h4>
+            <p>Published in {{book.year_of_publish}}</p>
+            <button id="like" onclick="like({{book.pk}})" class="btn btn-link"><i class="far fa-thumbs-up fa-2x" id="like-icon"></i></button>
+            <div id="likedBy" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+</div>
 
-    <button id="like" onclick="like({{book.pk}})">Like</button>
+<h5>Comments</h5>
+<form id="comment-form" method="post" data-book-id="{{ book.pk }}">
+    {% csrf_token %}
+    <textarea id="comment-textarea" name="comment" class="form-control"></textarea>
+</form>
+<button id="add-comment-btn" type="submit" class="btn btn-primary" style="margin-top: 8px;" onclick="addComment({{book.pk}})">Post Comment</button>
+<div id="card-container" style="display: flex; flex-wrap: wrap;margin-top: 40px;margin-bottom: 100px;gap: 20px;"></div>
 
-    <script>
-        async function like(id){
-            const formData = new FormData()
-            formData.append("id", id)
-            
-            fetch("{% url 'main:add_like_ajax' %}", {
+<script>
+
+    window.onload = function(){
+        const form = new FormData()
+        form.append("id", {{book.pk}})
+        console.log({{book.pk}})
+
+        fetch("{% url 'main:like_dislike' %}",{
+            method : "POST",
+            body : form
+        }).then((like_or_dislike) => like_or_dislike.json()).then((res) => did_like(res)).then((data) => build_like({{book.pk}}))
+
+        refreshComments({{book.pk}})
+    }
+    
+
+    function did_like(like_or_dislike) {
+        var length_temp = like_or_dislike.length;
+        var likeIcon = document.getElementById('like-icon');
+        if (length_temp === 1) {
+            likeIcon.classList.add('fas');
+            likeIcon.classList.remove('far');
+            likeIcon.style.color = '#5799ef';
+        } else {
+            likeIcon.classList.remove('fas');
+            likeIcon.classList.add('far');
+            likeIcon.style.color = '#808080';
+        }
+    }
+    
+    async function build_like(id) {
+        var likes = await see_like(id);
+        var res = `<table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>by</th>
+                    <th>book</th>
+
+                </tr>
+            </thead>
+            <tbody>`;
+
+
+
+
+        for (const l of likes) {
+            const username = await get_username(l.fields.user);
+            console.log();
+            res += "<tr>";
+            res += "<td><a style=\"color: #ecbe17\" href=\"{% url 'main:profile' user_id=123 %}\">".replace("123", l.fields.user)  + username[0].fields.username  + "</a></td>";
+            res += "</tr>";
+        }
+
+
+
+        res += "</tbody></table>";
+        document.getElementById('likedBy').innerHTML = res;
+    }
+
+    async function like(id) {
+        const formData = new FormData();
+        formData.append("id", id);
+
+        const form = new FormData();
+        form.append("id", id);
+
+        fetch("{% url 'main:add_like_ajax' %}", {
+            method: "POST",
+            body: formData
+        }).then(() => {
+            return fetch("{% url 'main:like_dislike' %}", {
+                method: "POST",
+                body: form
+            });
+        }).then((like_or_dislike) => like_or_dislike.json()).then((res) => did_like(res)).then((data) => build_like(id));
+    }
+
+
+        /*
+        Function ini untuk MENDAPATKAN siapa saja yang like buku ini.
+        digunakan untuk debugging, sehingga jika ingin di comment out silahkan
+        menerima parameter id buku.
+        */
+        async function see_like(bookId){
+            const formData= new FormData()
+            formData.append("id", bookId)
+            return fetch("{% url 'main:see_like_ajax' %}", {
                 method: "POST",
                 body: formData
+            }).then((res) => res.json())
+        }
+        
+
+        const bookIdComment = {{book.pk}}
+
+        async function getComments(id) {
+            console.log("Inside getComments function");
+            const formData = new FormData()
+            formData.append("id", id)
+            return fetch("{% url 'main:get_comments_ajax' %}", {
+                method: "POST",
+                body: formData
+            }).then((res) => res.json())
+        }
+
+        async function addComment(id) {
+            console.log("Inside addComment function");
+            let comment = document.getElementById("comment-textarea");
+
+            console.log("length"+comment.value.length)
+            if(comment.value.length===0){
+                return
+            }
+
+            form = new FormData()
+            
+            form.append("id", {{book.pk}})
+            form.append("comment",comment.value)
+            console.log(form)
+            fetch("{% url 'main:add_comment' %}", {
+                method: "POST",
+                body: form
+            }).then((data) => {
+                console.log("Comment added successfully:", data); refreshComments(bookIdComment);})
+            document.getElementById("comment-textarea").value=""
+            console.log("abis manggil url")
+
+            // form.reset()
+            return false
+        }
+
+        async function refreshComments(id) {
+            document.getElementById("card-container").innerHTML = ""
+            
+            const comments = await getComments(bookIdComment)
+            let htmlString = ""
+
+            comments.forEach(async (com) => {
+                const username = await get_username(com.fields.user);
+                htmlString += `\n
+                <div id="card-comment" class="card" style="width: 18rem;">
+                    <div class="card-body">
+                      <h5 class="card-title">${username[0].fields.username}</h5>
+                      <h6 class="card-subtitle mb-2 text-muted">"${com.fields.comment}"</h6>
+                      <br>
+                      
+                    </div>
+                  </div>
+                
+                `
+                document.getElementById("card-container").innerHTML = htmlString
+               
             })
-            console.log("clicked")
-            document.getElementById('like').style.color = "blue";
+
+        }
+        async function get_username(user_id){
+            const form = new FormData()
+            form.append("id", user_id)
+            user = await fetch("{% url 'main:get_username' %}", {
+                method: "POST",
+                body:form
+            }).then((user)=>user.json())
+            return user
         }
     </script>
-{%endblock%}
+
+{% endblock content %}

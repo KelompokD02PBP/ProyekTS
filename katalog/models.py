@@ -16,13 +16,13 @@ class Book(models.Model):
     def __str__(self) -> str:
         return "ISBN: "+str(self.isbn)+ " ; Title: "+str(self.title)+" ; Author: "+str(self.author)
     
+    '''
+    GK GUNA
+    '''
+# class AppUser(models.Model):
+#     user = models.OneToOneField(on_delete= models.CASCADE, to=User)
+#     phone_number = models.CharField(max_length=20)
+#     liked_books = models.ManyToManyField(Book)
 
-class AppUser(models.Model):
-    user = models.OneToOneField(on_delete= models.CASCADE, to=User)
-    phone_number = models.CharField(max_length=20)
-    liked_books = models.ManyToManyField(Book)
-
-    def __str__(self):
-        return self.user.get_username() +" liked books: "+str(self.liked_books.all())
-    
-    
+#     def __str__(self):
+#         return self.user.get_username() +" liked books: "+str(self.liked_books.all())

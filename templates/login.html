@@ -2,52 +2,33 @@
 
 {% block meta %}
     <title>Login</title>
-    <style>
-        table tr td,
-        table tr th {
-            padding:3px;
-        }
-        input.btn {
-            --bs-btn-hover-border-color: black;
-            --bs-btn-border-color: black;
-        }
-    </style>
 {% endblock meta %}
 
 {% block content %}
-<div class="login">
+<div class="container" style="align-content: center; height: 100vh; margin-top: 100px; ">
+    <div class="row justify-content-center" style="margin-right: 40px;">
+        <div class="col-lg-6 col-md-12" style="color: #ffffff;">
+            <h1 class="text-center" style="margin-bottom: 20px;">Login</h1>
 
-    <h1>Login</h1>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username:</label>
+                    <input type="text" name="username" placeholder="Username" class="form-control" style="padding: 10px;">
+                </div>
 
-    <form method="POST" action="">
-        {% csrf_token %}
-        <table>
-            <tr>
-                <td>Username: </td>
-                <td><input type="text" name="username" placeholder="Username" class="form-control"></td>
-            </tr>
-                    
-            <tr>
-                <td>Password: </td>
-                <td><input type="password" name="password" placeholder="Password" class="form-control"></td>
-            </tr>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password:</label>
+                    <input type="password" name="password" placeholder="Password" class="form-control" style="padding: 10px;">
+                </div>
 
-            <tr>
-                <td></td>
-                <td><input class="btn login_btn" type="submit" value="Login"></td>
-            </tr>
-        </table>
-    </form>
-
-    {% if messages %}
-        <ul>
+                <input style="--bs-btn-hover-border-color: black; --bs-btn-border-color: black;" class="btn login_btn mb-3" type="submit" value="Login">
+            </form>
             {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}     
-        
-    Don't have an account yet? <a href="{% url 'main:register' %}">Register Now</a>
-
+        <p>{{message}}</p>
+    {% endfor %}
+            <p>Don't have an account yet? <a href="{% url 'main:register' %}">Register Now</a></p>
+        </div>
+    </div>
 </div>
 {% endblock content %}
