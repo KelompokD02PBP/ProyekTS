@@ -1,5 +1,8 @@
 # 💻 Readify
 
+![deploy workflow](https://github.com/KelompokD02PBP/proyekts/.github/workflows/pbp-deploy.yml/badge.svg)
+![testing workflow](https://github.com/KelompokD02PBP/proyekts/.github/workflows/testing.yml/badge.svg)
+<br>
 Website: [http://readify-d02-tk.pbp.cs.ui.ac.id](http://readify-d02-tk.pbp.cs.ui.ac.id)
 
 ## 🏫 Proyek Tengah Semester dari kelompok D02 PBP

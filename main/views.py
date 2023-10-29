@@ -28,11 +28,11 @@ from PIL import Image
 Image.MAX_IMAGE_PIXELS = 1000000
 
 from re import match
-from random import choice
+from random import choice, choices
 
 def show_landing(request):
     context = {
-        "book": choice(Book.objects.all())
+        "books": list(choices(Book.objects.all(), k=5))
     }
     return render(request, "landing.html", context)
 
