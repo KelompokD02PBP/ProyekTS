@@ -90,72 +90,8 @@
 </div>
 
 <div style="display: flex; flex-direction: row; align-items: center; margin-top: 20px; margin-bottom: 40px; justify-content: center;gap: 20px;">
-    {% comment %} {% if not from_search %}
-        <a id="prevPageLink" href="{% url 'main:show_main_page' page_num|add:" -1" %}?order_by={{request.GET.order_by|default:"asc" }}">
-            <button style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">PrevPage</button>
-        </a>
-        <a id="nextPageLink" href="{% url 'main:show_main_page' page_num|add:" 1" %}?order_by={{request.GET.order_by|default:"asc" }}">
-            <button style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">NextPage</button>
-        </a>
-    {% endif %} {% endcomment %}
-
-    {% comment %} {% if from_search %}
-        {% if page_num == 1 %}
-        <form style="margin-top: 20px;" onsubmit="return false;" id="sortFormSearch">
-            {% csrf_token %}
-            <div class="input-group" style="margin-bottom: 10px;">
-                <select class="custom-select" name="order_by" id="inputGroupSelect05">
-                    <option selected>Choose...</option>
-                    <option value="1">Sort A-Z</option>
-                    <option value="2">Sort Z-A</option>
-                    <option value="3">Sort Year Asc</option>
-                    <option value="4">Sort Year Desc</option>
-                    <option value="5">Filter 2000 and Up</option>
-                    <option value="6">Filter Before 2000</option>
-                </select>
-                <div class="input-group-append">
-                    <button id="button_submit_search" class="btn btn-outline-secondary" type="submit">Sort & Filter</button>
-                </div>
-            </div>
-        </form>
-        {% endif %}
-    {% endif %} {% endcomment %}
-
-    {% if user.is_authenticated %}
-        <div class="mt-5" style="overflow: auto">
-        <h3 class="text-white h5">Liked Books</h3>
-        <div class="d-flex gap-3 w-100" id="likes"></div>
-        </div>
-        <hr />
-    {% endif %}
-
-    {% comment %} <div id="katalog" style="display: flex; flex-wrap: wrap;">
-        {% if books %}
-        {% for book in books %}
-        <div class="card" style="width: 18rem; margin: 10px;background-color: #1a1a1a;color: #ffffff;">
-            <div style="height: 250px;display: flex; justify-content: center;">
-                <img class="card-img-top" src="{{ book.image_url_l }}" alt="Card image cap"
-                    style="height: 250px; object-fit: cover;">
-            </div>
-            <div class="container-card" style="display: flex;justify-content: space-between;"></div>
-            <div class="card-body" style="display: flex; flex-direction: column;">
-                <h5 class="card-title" style="font-size: 16px; margin: 0;">
-                    <p style="font-size: larger;">{{ book.title }}</p>
-                </h5>
-                <p class="card-text" style="font-size: 16px;">Published {{ book.year_of_publish }}</p>
-                <p class="card-text" style="font-size: 16px;">by {{ book.publisher }}</p>
-            </div>
-            <div style="align-self: flex-end;margin:10px">
-                <a  href="{% url 'main:book_review' book.pk %}" class="btn btn-primary" style="font-size: 16px;">See More</a>
-            </div>
-        </div>
-        {% endfor %}
-        {% else %}
-        <h4 style="margin-top: 20px;margin-bottom: 20px;">There are no books left...</h4>
-        {% endif %}
-    </div> {% endcomment %}
-
-    <div style="display: flex; flex-direction: row; align-items: center; margin-top: 20px; margin-bottom: 40px; justify-content: center;gap: 20px;">
+    
+    <div style="display: flex; flex-direction: row; align-items: center; margin-top: 20px; margin-bottom: 30px; justify-content: center;gap: 20px;">
         {% if not from_search %}
         <a id="prevPageLink" href="{% url 'main:show_main_page' page_num|add:" -1" %}?order_by={{request.GET.order_by|default:"asc" }}">
             <button style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">PrevPage</button>
@@ -176,6 +112,17 @@
     </div>
     {% endif %}
     </div>
+
+    {% if user.is_authenticated %}
+        <div class="mt-5" style="overflow: auto">
+        <h1 class="text-white h5" style="font-size: x-large;">Liked Books</h1>
+        <div class="d-flex gap-3 w-100" id="likes" style="display: flex; flex-wrap: wrap;"></div>
+        </div>
+        <hr />
+    {% endif %}
+
+
+
 
 {% block js_page %} 
 {% if user.is_authenticated %}
@@ -279,7 +226,7 @@
 
             sortedBooks.forEach((book) => {
                 htmlString += `
-                <div class="card" style="width: 18rem; margin: 10px;">
+                <div class="card" style="width: 18rem; margin: 10px;background-color: #1a1a1a;color: #ffffff;">
                     <div style="height: 250px;display: flex; justify-content: center;">
                         <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover;">
                     </div>
@@ -329,18 +276,20 @@
                   booksContainer.empty(); // Kosongkan daftar buku sebelum memasukkan buku yang baru dimuat
                   $.each(JSON.parse(response.books), function (index, book) {
                     // Tambahkan buku ke daftar buku
-                    booksContainer.append(`<div class="col-10 col-md-4 col-lg-3">
-                                  <div class="card h-100">
-                                      <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover" />
-                                      <div class="card-body d-flex flex-column gap-2">
-                                          <h5 class="card-title">${book.fields.title}</h5>
-                                          <p class="card-text">
-                                          Some quick example text to build on the card title and make up the bulk of the card's content.
-                                          </p>
-                                          <a href="book/${book.pk}" class="btn btn-primary ms-auto mt-auto">See More</a>
-                                      </div>
-                                  </div>
-                              </div>`);
+                    booksContainer.append(`  <div class="card" style="width: 18rem; margin: 10px;">
+                        <div style="height: 250px;display: flex; justify-content: center;">
+                            <img class="card-img-top" src="${book.fields.image_url_l}" alt="Card image cap" style="height: 250px; object-fit: cover;">
+                        </div>
+                        <div class="card-body" style="display: flex; flex-direction: column;">
+                            <h5 class="card-title" style="font-size: 16px; margin: 0;">
+                                <p style="font-size: larger;">${book.fields.title}</p>
+                            </h5>
+                            <p class="card-text" style="font-size: 14px;">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        </div>
+                        <div style="align-self: flex-end;margin:10px">
+                            <a href="/book/${book.pk}" class="btn btn-primary" style="font-size: 16px;">See More</a>
+                        </div>
+                    </div>`);
                   });
                 } else {
                   console.log(response.message);

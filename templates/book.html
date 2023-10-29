@@ -24,7 +24,7 @@
     <textarea id="comment-textarea" name="comment" class="form-control"></textarea>
 </form>
 <button id="add-comment-btn" type="submit" class="btn btn-primary" style="margin-top: 8px;" onclick="addComment({{book.pk}})">Post Comment</button>
-<table id="comment-table"></table>
+<div id="card-container" style="display: flex; flex-wrap: wrap;margin-top: 40px;margin-bottom: 100px;gap: 20px;"></div>
 
 <script>
 
@@ -68,11 +68,18 @@
             </thead>
             <tbody>`;
 
-        likes.forEach((l) => {
+
+
+
+        for (const l of likes) {
+            const username = await get_username(l.fields.user);
+            console.log();
             res += "<tr>";
-            res += "<td><a href=\"{% url 'main:profile' user_id=123 %}\">".replace("123", l.fields.user) + l.fields.user + "</a></td>";
+            res += "<td><a style=\"color: #ecbe17\" href=\"{% url 'main:profile' user_id=123 %}\">".replace("123", l.fields.user)  + username[0].fields.username  + "</a></td>";
             res += "</tr>";
-        });
+        }
+
+
 
         res += "</tbody></table>";
         document.getElementById('likedBy').innerHTML = res;
@@ -151,31 +158,29 @@
         }
 
         async function refreshComments(id) {
-            document.getElementById("comment-table").innerHTML = ""
+            document.getElementById("card-container").innerHTML = ""
             
             const comments = await getComments(bookIdComment)
-            let htmlString = `<tr>
-                <th>Name</th>
-                <th>Comment</th>
-            </tr>`
-            document.getElementById("comment-table").innerHTML=htmlString
+            let htmlString = ""
 
             comments.forEach(async (com) => {
                 const username = await get_username(com.fields.user);
-                console.log(username[0].fields.username)
-                htmlString = document.getElementById("comment-table").innerHTML
-                htmlString += `\n<tr>
-                <td>${username[0].fields.username}</td>
-                <td>${com.fields.comment}</td>
-                </tr>`
-                document.getElementById("comment-table").innerHTML = htmlString
+                htmlString += `\n
+                <div id="card-comment" class="card" style="width: 18rem;">
+                    <div class="card-body">
+                      <h5 class="card-title">${username[0].fields.username}</h5>
+                      <h6 class="card-subtitle mb-2 text-muted">"${com.fields.comment}"</h6>
+                      <br>
+                      
+                    </div>
+                  </div>
+                
+                `
+                document.getElementById("card-container").innerHTML = htmlString
+               
             })
 
         }
-        
-        //document.getElementById("add-comment-btn").onclick = addComment(bookIdComment)
-
-        //refreshComments(bookIdComment)
         async function get_username(user_id){
             const form = new FormData()
             form.append("id", user_id)
