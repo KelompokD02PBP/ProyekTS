@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render
 from .models import Book
 from django.http import HttpResponse
@@ -7,7 +8,9 @@ import csv
 import os
 import time
 import re
-# Create your views here.
+from django.views.decorators.csrf import csrf_exempt
+
+from django.core import serializers
 
 # USER GAK BOLEH AKSES
 def make_book_dataframe(request):
@@ -109,3 +112,61 @@ def get_books(request):
         res_list.append(str(b))
 
     return HttpResponse("\n".join(res_list), content_type="text/plain")
+
+def get_books_json(request):
+    books = Book.objects.all()
+    books = books[:100]
+
+    return HttpResponse(serializers.serialize('json',books), content_type="application/json")
+
+def get_search_book_json(request, book_name):
+    tm = time.time() 
+    # HOLY SHIT INI KENCENG BANGET
+
+    books = Book.objects.filter(title__istartswith=book_name)| Book.objects.filter(title__iendswith=book_name) | Book.objects.filter(title__icontains=book_name)
+
+    
+    return HttpResponse(serializers.serialize('json',books), content_type="application/json")
+
+@csrf_exempt
+def get_sorted_book_json(request):
+    order_by=""
+    if request.method == 'POST':
+        # order_by_value = request.POST.get('order_by')
+        order_by_value = json.loads(request.body)
+        order_by_value = order_by_value['order_by']
+        print("order by val :",order_by_value)
+        if order_by_value == '1':
+            order_by = "asc"
+        elif order_by_value == '2':
+            order_by = "desc"
+        elif order_by_value == '3':
+            order_by = "year_asc"
+        elif order_by_value == '4':
+            order_by = "year_desc"
+        elif order_by_value == '5':
+            order_by = "atas_2000"
+        elif order_by_value == '6':
+            order_by = "bawah_2000"
+        else:
+            order_by = request.GET.get('order_by', 'asc')
+    else:
+        order_by = request.GET.get('order_by', 'asc')
+        
+    if order_by == 'asc' or order_by==None:
+        books = Book.objects.all().order_by("title")
+    elif order_by =='desc':
+        books = Book.objects.all().order_by("-title")
+    elif order_by == "year_asc":
+        books = Book.objects.all().order_by("year_of_publish")
+    elif order_by == "year_desc":
+        books = Book.objects.all().order_by("-year_of_publish")
+    elif order_by == "atas_2000":
+        books = Book.objects.filter(year_of_publish__gte=2000)
+    elif order_by == "bawah_2000":
+        books = Book.objects.filter(year_of_publish__lt=2000)
+
+    sorted_books = books
+    sorted_books = sorted_books[:100]
+    
+    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
