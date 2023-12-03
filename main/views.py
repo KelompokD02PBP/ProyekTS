@@ -28,30 +28,32 @@ from PIL import Image
 Image.MAX_IMAGE_PIXELS = 1000000
 
 from re import match
-from random import choice
+from random import choice, choices
 
 def show_landing(request):
     context = {
-        "book": choice(Book.objects.all())
+        "books": list(choices(Book.objects.all(), k=5))
     }
     return render(request, "landing.html", context)
 
-def show_main(request):
-    context = {}
+
+# Unused function
+# def show_main(request):
+#     context = {}
     
-    if request.user:
-        context['name'] = request.user.username
-        context['page_num']=-1 #Kalo blm login gk bisa ngapa-ngapain
+#     if request.user:
+#         context['name'] = request.user.username
+#         context['page_num']=-1 #Kalo blm login gk bisa ngapa-ngapain
         
-        context['aaa'] = request.user.pk
+#         context['aaa'] = request.user.pk
 
-        if request.user.id !=None: #Kalo udh login bisa liat halaman
-            context['page_num']=1
-            # context['likes']=get_liked_books(request.user)
-            context['user_id']=request.user.pk
-            context['books']=get_katalog(1,order_by=request.GET.get('order_by'))
+#         if request.user.id !=None: #Kalo udh login bisa liat halaman
+#             context['page_num']=1
+#             # context['likes']=get_liked_books(request.user)
+#             context['user_id']=request.user.pk
+#             context['books']=get_katalog(1,order_by=request.GET.get('order_by'))
 
-    return render(request, "main.html", context)
+#     return render(request, "main.html", context)
 
 
 def show_main_page(request, page_num):
@@ -101,7 +103,7 @@ def show_main_search(request, page_num):
 
     order_by  = request.GET.get('order_by')
     to_find = request.GET.get("search_bar")
-    print("last_searched:",last_searched)
+    #print("last_searched:",last_searched)
         
     if request.user:
         context['name'] = request.user.username
@@ -136,7 +138,7 @@ def show_main_search(request, page_num):
                 books = search_katalog(last_searched, page_num-1,order_by=request.GET.get('order_by'))
                 context['page_num']=page_num-1
             context['books'] = books
-    #   
+    
     return render(request, "main.html", context)
 
 
@@ -394,9 +396,10 @@ def get_username(request):
     user = User.objects.filter(pk=id)
     return HttpResponse(serializers.serialize('json',user), content_type="application/json")
 
-def sort_books_ajax(request,page_num,order_by):
-    sorted_books = get_katalog(page_num,order_by)
-    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
+# Unused function
+# def sort_books_ajax(request,page_num,order_by):
+#     sorted_books = get_katalog(page_num,order_by)
+#     return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
 
 @csrf_exempt
 def sort_books_ajax_search(request,page_num,order_by):
@@ -447,20 +450,22 @@ def sort_main_ajax_search(request,page_num):
         elif order_by_value == '6':
             order_by = "bawah_2000"
         else:
-            order_by = request.GET.get('order_by', 'asc')
+            order_by = request.POST.get('order_by', 'asc')
     else:
         order_by = request.GET.get('order_by', 'asc')
         
     sorted_books = search_katalog(last_searched, page_num,order_by)
     
-    return HttpResponse(serializers.serialize('json',sorted_books))
+    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
+
+
 @csrf_exempt
 def get_comments_ajax(request):
     if request.method == 'POST':
         id = request.POST.get("id")
         book = Book.objects.get(pk=id)
         comments = Comment.objects.filter(book=book)
-        return HttpResponse(serializers.serialize('json', comments))
+        return HttpResponse(serializers.serialize('json', comments), content_type="application/json")
 
 @csrf_exempt
 def add_comment_ajax(request):
@@ -468,7 +473,7 @@ def add_comment_ajax(request):
     if request.method == 'POST':
         print("masuk request==post")
         # if request.POST.is_valid():
-            
+        
         comment = escape(request.POST.get('comment'))
         print("comment",comment, type(comment))
         id = request.POST.get("id")
@@ -483,13 +488,13 @@ def add_comment_ajax(request):
         new_comment.save()
         return HttpResponse(b"CREATED", status=201)
     return HttpResponseNotFound()
-    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
 
 
 @csrf_exempt
 def get_random_book_ajax(request):
     book = choice(Book.objects.all())
     return HttpResponse(serializers.serialize('json',[book]), content_type="application/json")
+
 
 # Function untuk mendapatkan data buku yang sudah dilike
 @csrf_exempt
