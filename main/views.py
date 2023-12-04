@@ -149,6 +149,8 @@ def register(request):
 
     if request.method == "POST":
         user_form = UserCreationForm(request.POST)
+        print(request.POST.get("password1"))
+        print(request.POST.get("password2"))
         profile_form = ProfileUserForm(request.POST or None, request.FILES or None)
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
