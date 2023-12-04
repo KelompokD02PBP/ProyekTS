@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.forms import UserCreationForm
@@ -288,6 +289,34 @@ def show_profile(request, user_id):
     
     return render(request, "profile.html", context)
 
+
+
+
+def show_profile_flutter(request, user_id):
+    books_you_like = Like.objects.filter(user__pk=user_id)
+
+    
+    profile_data = {
+        'user_id': user_id,
+        
+    }
+
+    
+    serialized_profile_data = serializers.serialize('json', [profile_data])
+    serialized_books_you_like = serializers.serialize('json', books_you_like)
+
+    
+    response_data = {
+        'profile_data': serialized_profile_data,
+        'books_you_like': serialized_books_you_like,
+        
+    }
+    return JsonResponse(response_data)
+
+    
+
+
+
 # Function untuk menambahakan like
 @csrf_exempt
 def add_like_ajax(request):
@@ -499,8 +528,12 @@ def get_random_book_ajax(request):
 # Function untuk mendapatkan data buku yang sudah dilike
 @csrf_exempt
 def get_liked_books_ajax(request):
+    print("masuk")
     if request.method == 'POST':
-        books = Like.objects.filter(user = request.user).order_by('-timestamp')
+        a = json.loads(request.body)
+        
+        
+        books = Like.objects.filter(user_id=a['id']).order_by('-timestamp')
         
         books = [like.book for like in books]
 
@@ -508,7 +541,4 @@ def get_liked_books_ajax(request):
         serialized_books = serializers.serialize('json', books)
 
         # Kirim data buku sebagai respons JSON
-        return JsonResponse({'status': 'success', 'books': serialized_books})
-
-    # Jika metode permintaan tidak valid
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+        return HttpResponse(serialized_books,content_type="application/json")

@@ -28,4 +28,5 @@ urlpatterns = [
     path('randombookapi/', get_random_book_ajax, name="get_random_book_ajax"),
 
     path('get-liked-books/', get_liked_books_ajax, name="get_liked_books"),
+    path('show_profile_flutter/', show_profile_flutter, name="show_profile_flutter")
 ]
