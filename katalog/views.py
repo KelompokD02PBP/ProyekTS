@@ -129,7 +129,7 @@ def get_search_book_json(request, book_name):
     return HttpResponse(serializers.serialize('json',books), content_type="application/json")
 
 @csrf_exempt
-def get_sorted_book_json(request):
+def get_sorted_book_json(request, book_name=""):
     order_by=""
     if request.method == 'POST':
         # order_by_value = request.POST.get('order_by')
@@ -154,15 +154,15 @@ def get_sorted_book_json(request):
         order_by = request.GET.get('order_by', 'asc')
         
     if order_by == 'asc' or order_by==None:
-        books = Book.objects.all().order_by("title")
+        books = Book.objects.filter(title__istartswith=book_name)| Book.objects.filter(title__iendswith=book_name) | Book.objects.filter(title__icontains=book_name).order_by("title")
     elif order_by =='desc':
-        books = Book.objects.all().order_by("-title")
+        books = Book.objects.filter(title__istartswith=book_name)| Book.objects.filter(title__iendswith=book_name) | Book.objects.filter(title__icontains=book_name).order_by("-title")
     elif order_by == "year_asc":
-        books = Book.objects.all().order_by("year_of_publish")
+        books = Book.objects.filter(title__istartswith=book_name)| Book.objects.filter(title__iendswith=book_name) | Book.objects.filter(title__icontains=book_name).order_by("year_of_publish")
     elif order_by == "year_desc":
-        books = Book.objects.all().order_by("-year_of_publish")
+        books = Book.objects.filter(title__istartswith=book_name)| Book.objects.filter(title__iendswith=book_name) | Book.objects.filter(title__icontains=book_name).order_by("-year_of_publish")
     elif order_by == "atas_2000":
-        books = Book.objects.filter(year_of_publish__gte=2000)
+        books = Book.objects.filter(title__istartswith=book_name, year_of_publish__gte=2000) | Book.objects.filter(title__icontains=book_name, year_of_publish__gte=2000) | Book.objects.filter(title__iendswith=book_name, year_of_publish__gte=2000)
     elif order_by == "bawah_2000":
         books = Book.objects.filter(year_of_publish__lt=2000)
 
