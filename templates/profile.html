@@ -1,78 +1,112 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>PROFILE</h2>
-    {% for m in messages %}
-        <p>{{m}}</p>
-    {% endfor %}
-    <h4 id="username">{{profile.user.username}}</h4>
-    {% if profile.profile_picture %}
-        <img id="profile_picture" style="width:20%; height:20%"src={{profile.profile_picture.url}} alt="profile"/>
-    {% endif %}
-    <br/>
-    <p id="address">Address : {{profile.address}}</p>
-    <p id="email">Email : {{profile.email}}</p>
+<div class="container" style="color: #ffffff; text-align: center; margin-bottom: 40px;">
+    <div class="row" style="margin-right: 30px;text-align: center;">
+        <div class="col-sm-12">
+            <h2>PROFILE</h2>
+            {% for m in messages %}
+                <p>{{m}}</p>
+            {% endfor %}
+            
+            <h4 id="username">{{profile.user.username}}</h4>
+            {% if profile.profile_picture %}
+            <div style="width: 50%; height: auto; margin: 10px auto;margin-top:20px">
+                <img id="profile_picture" style="width:20%; height:20%" src={{profile.profile_picture.url}} alt="profile"/>
+            </div>
+            {% else %}
+            <div style="width: 50%; height: auto; margin: 10px auto;margin-top: 20px;">
+                <img id="profile_picture" style="width:160px; height:160px" src="https://i.imgur.com/1Dyglmx.png" alt="profile"/>
+            </div>
+            {% endif %}
+            <br />
+            <p id="address">Address: {{profile.address}}</p>
+            <p id="email">Email: {{profile.email}}</p>
 
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Update Profile</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style="color: black;text-align: left;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Update Profile</h1>
+                            <button type="button" style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;border-radius: 10px;" data-bs-dismiss="modal" aria-label="Close">X</button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="form" onsubmit="return false;">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="Username" class="col-form-label">Username:</label>
+                                    <input type="text" class="form-control" id="Username" name="Username" value="{{profile.user.username}}"></input>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profile_picture" class="col-form-label">Profile Picture:</label>
+                                    <input type="file" class="form-control" id="profile_picture" name="profile_picture"></input>
+                                    {% comment %} <input type="text" class="form-control" id="profile_picture" name="profile_picture"></input> {% endcomment %}
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Address" class="col-form-label">Address:</label>
+                                    <input type="text" class="form-control" id="Address" name="Address" value="{{profile.address}}"></input>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="Email" class="col-form-label">Email:</label>
+                                    <input type="text" class="form-control" id="Email" name="Email" value="{{profile.email}}"></input>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="button_add" data-bs-dismiss="modal" onclick="update({{profile.user.pk}})">Update</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <form id="form" onsubmit="return false;">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="Username" class="col-form-label">Username:</label>
-                            <input type="text" class="form-control" id="Username" name="Username"></input>
+            </div>
+            {% if self_profile %}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Update Profile</button>
+            {% endif %}
+            <br>
+
+            <h4 style="margin-top: 20px;">Books you've liked</h4>
+            <div style="display: flex;justify-content: center;margin-top: 20px;"> 
+                <div class="carousel-container" style="height: 350px; width: 300px; overflow: hidden; position: relative;align-items: center;">
+                    <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for like in books_you_like %}
+                            <div class="carousel-item {% if forloop.first %} active {% endif %}">
+                                <a href="{% url 'main:book_review' like.book.pk %}">
+                                    <img class="d-block w-100" src="{{like.book.image_url_l}}" alt="Book Image">
+                                </a>
+                            </div>
+                            {% endfor %}
                         </div>
-                        <div class="mb-3">
-                            <label for="profile_picture" class="col-form-label">Profile Picture:</label>
-                            <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*"></input>
-                            {% comment %} <input type="text" class="form-control" id="profile_picture" name="profile_picture"></input> {% endcomment %}
+                        <div class="flex" style="justify-content: center;align-items: center;text-align: center;">
+            
+                            <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev" style="background-color:#808080;height: 50px;margin-top: 150px;border-radius: 10px;">
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                            <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next" style="background-color: #808080; height: 50px;margin-top: 150px;border-radius: 10px;">
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
-                        <div class="mb-3">
-                            <label for="Address" class="col-form-label">Address:</label>
-                            <input type="text" class="form-control" id="Address" name="Address"></input>
-                        </div>
-                        <div class="mb-3">
-                            <label for="Email" class="col-form-label">Email:</label>
-                            <input type="text" class="form-control" id="Email" name="Email"></input>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="button_add" data-bs-dismiss="modal" onclick="update({{profile.user.pk}})">Update</button>
+                        
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    {% if self_profile %}
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Update Profile</button>
-    {% endif %}
-    <br>
-
-    <h4>Books you've liked</h4>
-
-    {% for like in books_you_like %}
-        <a href="{% url 'main:book_review' like.book.pk %}">{{like.book.title}}</p>
-    {% endfor %}
-
+</div>
     <script>
         async function refresh_profile(data){
-            //console.log(data)
-            data.forEach(profile=>{
-                //console.log(profile.fields.email)
-                document.getElementById("email").innerHTML=`${profile.fields.email}`
-                document.getElementById("address").innerHTML=`${profile.fields.address}`
-                document.getElementById("username").innerHTML=`${get_new_username(profile.fields.user)}`
-                if(profile.fields.profile_picture){
-                    document.getElementById("profile_picture").src=`../media/${profile.fields.profile_picture}`
-                }
-
-            })
+            console.log(JSON.stringify(data))
+            // data.forEach(profile=>{
+            //     //console.log(profile.fields.email)
+            //     document.getElementById("email").innerHTML=`Email : ${profile.fields.email}`
+            //     document.getElementById("address").innerHTML=`Address : ${profile.fields.address}`
+            //     document.getElementById("username").innerHTML=`${get_new_username(profile.fields.user)}`
+            //     if(profile.fields.profile_picture){
+            //         document.getElementById("profile_picture").src=`../media/${profile.fields.profile_picture}`
+            //     }
+            // })
+            
+            window.location.reload()
         }
 
         async function get_new_username(user_id){
@@ -101,7 +135,6 @@
 
             //console.log("after fetch")
             document.getElementById("form").reset()
-            return false
         }
     </script>
 {% endblock content%}

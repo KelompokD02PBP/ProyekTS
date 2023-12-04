@@ -11,9 +11,8 @@
 
 {% block content %}
 
-<div class = "login">
-    
-    <h1>Register</h1>  
+<div class="container" style="color: #ffffff; margin-top: 50px;">
+    <h1 style="margin-bottom: 40px;">Register</h1>  
         <!-- Pas Register dia bikin 2 model (User dan Profileuser)-->
         <form method="POST" enctype="multipart/form-data">  
             {% csrf_token %}  
@@ -26,16 +25,11 @@
                 </tr>  
             </table>  
         </form>
+        {% for message in messages %}
+        <p>{{message}}</p>
+    {% endfor %}
 
-    {% if messages %}  
-        <ul>   
-            {% for message in messages %}  
-                <li>{{ message }}</li>  
-                {% endfor %}  
-        </ul>   
-    {% endif %}
-
+    <p class="text-center">Already have an account? <a href="{% url 'main:login' %}">Login</a></p>
 </div>
-
 
 {% endblock content %}

@@ -9,13 +9,13 @@ def generate_database(apps, schema_editor):
     Book = apps.get_model("katalog", "Book")
     db_alias = schema_editor.connection.alias
     
-    source= os.path.join(BASE_DIR, 'datasets\\Books.csv')
+    source= os.path.join(BASE_DIR, 'datasets/Books.csv')
     print("\nall books test:")
 
     tm = time.time()
 
     book_list = []
-    with open(source+'/Books.csv', newline='', encoding='utf-8') as csvfile:
+    with open(os.path.join(source, 'Books.csv'), newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             book = Book(
