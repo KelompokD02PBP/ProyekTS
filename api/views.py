@@ -9,14 +9,17 @@ from main.forms import ProfileUserForm
 def login(request):
     username = request.POST['username']
     password = request.POST['password']
+    print(request.POST)
     user = authenticate(username=username, password=password)
     if user is not None:
         if user.is_active:
+
             auth_login(request, user)
             # Status login sukses.
             return JsonResponse({
                 "username": user.username,
                 "id" : user.pk,
+                "password" : password,
                 "status": True,
                 "message": "Login sukses!"
                 # Tambahkan data lainnya jika ingin mengirim data ke Flutter.

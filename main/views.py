@@ -26,7 +26,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Like
 
 from PIL import Image
-Image.MAX_IMAGE_PIXELS = 1000000
+Image.MAX_IMAGE_PIXELS = 10000000
 
 from re import match
 from random import choice, choices
@@ -293,31 +293,43 @@ def show_profile(request, user_id):
 
 
 
-
-def show_profile_flutter(request, user_id):
-    books_you_like = Like.objects.filter(user__pk=user_id)
-
-    
-    profile_data = {
-        'user_id': user_id,
+@csrf_exempt
+def show_profile_flutter(request):
+    print("in show_profile_flutter")
+    if request.method == "POST":
+        a = json.loads(request.body)
+        user_id = a['id']
         
-    }
-
-    
-    serialized_profile_data = serializers.serialize('json', [profile_data])
-    serialized_books_you_like = serializers.serialize('json', books_you_like)
-
-    
-    response_data = {
-        'profile_data': serialized_profile_data,
-        'books_you_like': serialized_books_you_like,
+        try:
+            profile = ProfileUser.objects.get(user__pk=user_id)
+        except:
+            return JsonResponse({
+                "status": False,
+                "message": "User tidak ditemukan."
+            }, status=404)
         
-    }
-    return JsonResponse(response_data)
+        pp_exists = False
+        url = ""
+        if profile.profile_picture:
+            pp_exists = True
+            url = profile.profile_picture.url
+        
+        return JsonResponse({
+            "status": True,
+            "message": "User ditemukan.",
+            "profile": {
+                "user": profile.user.pk,
+                "email": profile.email,
+                "address": profile.address,
+                "pp_exist": pp_exists,
+                "profile_picture": url,
+            }
+        }, status=200)
 
-    
-
-
+    return JsonResponse({
+        "status": False,
+        "message": "Harus menggunakan POST",
+    }, status=400)
 
 # Function untuk menambahakan like
 @csrf_exempt
@@ -371,53 +383,67 @@ def like_dislike_ajax(request):
 
 @csrf_exempt
 def update_profile(request):
-    print("in update_profile")
-
     if request.method == 'POST':
-        address = request.POST.get("Address")
-        email = request.POST.get("Email")
+        address = request.POST.get("address")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
         image = request.FILES.get("profile_picture")
-        print("img/",image)
-        username = request.POST.get("Username")
-        already_exist = User.objects.filter(username=username)
-
+        username = request.POST.get("username")
         user_id = request.POST.get("id")
         user = User.objects.get(pk=user_id)
-        profile = ProfileUser.objects.filter(user=user)[0]
+        profile = ProfileUser.objects.filter(user=user).first()
 
-        #Jika username taken by another person
-        if(username!=request.user.username and (len(already_exist)!=0 and already_exist[0].pk != profile.pk)):
+        if not profile:
+            return HttpResponseNotFound()
+
+        # Check if username is taken by another person
+        if username != request.user.username and User.objects.filter(username=username).exclude(pk=user_id).exists():
             messages.info(request, 'Username taken')
-            return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
-        if(len(username)==0):
-            messages.info(request, 'Username invalid')
-            return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
+            return JsonResponse({'status': 'error', 'message': 'Username taken'}, status=400)
         
-        #Jika bukan email
+        # Check if username is empty
+        if len(username) == 0:
+            messages.info(request, 'Username invalid')
+            return JsonResponse({'status': 'error', 'message': 'Username invalid'}, status=400)
+        
+        # Check if email is valid
         try:
             validate_email(email)
         except:
             messages.info(request, 'Invalid email')
-            return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
+            return JsonResponse({'status': 'error', 'message': 'Invalid email'}, status=400)
         
-        # check media validity
-        if image != None:
+        # Check image validity
+        if image:
             try:
                 img = Image.open(image)
                 img.verify()
             except:
                 messages.info(request, 'Invalid image')
-                return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
+                return JsonResponse({'status': 'error', 'message': 'Invalid image'}, status=400)
 
         profile.address = address
         profile.email = email
-        profile.profile_picture = image
+        if image:
+            profile.profile_picture = image
         user.username = username
+        user.set_password(password)
         user.save()
         profile.save()
+        print("ini pass")
+        print(password)
 
-        print(profile)
-        return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
+        return JsonResponse({'status': 'success', 'message': 'Profile updated successfully',
+                             "profile": {
+                "username": profile.user.username,
+                "password": profile.user.password,
+                "email": profile.email,
+                "address": profile.address,
+                "pp_exist": True,
+                "profile_picture": profile.profile_picture.url,
+                
+            }},status=201)
+    
     return HttpResponseNotFound()
 
 @csrf_exempt
