@@ -50,7 +50,11 @@
       "
     >
       <div class="container-fluid">
+        {% if request.user.is_authenticated %}
         <a href="{% url 'main:show_main_page' 1 %}">
+        {% else %}
+        <a href="{% url 'main:show_landing' %}">
+        {% endif%}
           <h1
             class="navbar-brand"
             href="/"

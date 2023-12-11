@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.forms import UserCreationForm
@@ -25,33 +26,35 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Like
 
 from PIL import Image
-Image.MAX_IMAGE_PIXELS = 1000000
+Image.MAX_IMAGE_PIXELS = 10000000
 
 from re import match
-from random import choice
+from random import choice, choices
 
 def show_landing(request):
     context = {
-        "book": choice(Book.objects.all())
+        "books": list(choices(Book.objects.all(), k=5))
     }
     return render(request, "landing.html", context)
 
-def show_main(request):
-    context = {}
+
+# Unused function
+# def show_main(request):
+#     context = {}
     
-    if request.user:
-        context['name'] = request.user.username
-        context['page_num']=-1 #Kalo blm login gk bisa ngapa-ngapain
+#     if request.user:
+#         context['name'] = request.user.username
+#         context['page_num']=-1 #Kalo blm login gk bisa ngapa-ngapain
         
-        context['aaa'] = request.user.pk
+#         context['aaa'] = request.user.pk
 
-        if request.user.id !=None: #Kalo udh login bisa liat halaman
-            context['page_num']=1
-            # context['likes']=get_liked_books(request.user)
-            context['user_id']=request.user.pk
-            context['books']=get_katalog(1,order_by=request.GET.get('order_by'))
+#         if request.user.id !=None: #Kalo udh login bisa liat halaman
+#             context['page_num']=1
+#             # context['likes']=get_liked_books(request.user)
+#             context['user_id']=request.user.pk
+#             context['books']=get_katalog(1,order_by=request.GET.get('order_by'))
 
-    return render(request, "main.html", context)
+#     return render(request, "main.html", context)
 
 
 def show_main_page(request, page_num):
@@ -101,7 +104,7 @@ def show_main_search(request, page_num):
 
     order_by  = request.GET.get('order_by')
     to_find = request.GET.get("search_bar")
-    print("last_searched:",last_searched)
+    #print("last_searched:",last_searched)
         
     if request.user:
         context['name'] = request.user.username
@@ -136,7 +139,7 @@ def show_main_search(request, page_num):
                 books = search_katalog(last_searched, page_num-1,order_by=request.GET.get('order_by'))
                 context['page_num']=page_num-1
             context['books'] = books
-    #   
+    
     return render(request, "main.html", context)
 
 
@@ -147,6 +150,8 @@ def register(request):
 
     if request.method == "POST":
         user_form = UserCreationForm(request.POST)
+        print(request.POST.get("password1"))
+        print(request.POST.get("password2"))
         profile_form = ProfileUserForm(request.POST or None, request.FILES or None)
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save()
@@ -287,6 +292,46 @@ def show_profile(request, user_id):
     
     return render(request, "profile.html", context)
 
+
+
+@csrf_exempt
+def show_profile_flutter(request):
+    print("in show_profile_flutter")
+    if request.method == "POST":
+        a = json.loads(request.body)
+        user_id = a['id']
+        
+        try:
+            profile = ProfileUser.objects.get(user__pk=user_id)
+        except:
+            return JsonResponse({
+                "status": False,
+                "message": "User tidak ditemukan."
+            }, status=404)
+        
+        pp_exists = False
+        url = ""
+        if profile.profile_picture:
+            pp_exists = True
+            url = profile.profile_picture.url
+        
+        return JsonResponse({
+            "status": True,
+            "message": "User ditemukan.",
+            "profile": {
+                "user": profile.user.pk,
+                "email": profile.email,
+                "address": profile.address,
+                "pp_exist": pp_exists,
+                "profile_picture": url,
+            }
+        }, status=200)
+
+    return JsonResponse({
+        "status": False,
+        "message": "Harus menggunakan POST",
+    }, status=400)
+
 # Function untuk menambahakan like
 @csrf_exempt
 def add_like_ajax(request):
@@ -339,53 +384,67 @@ def like_dislike_ajax(request):
 
 @csrf_exempt
 def update_profile(request):
-    print("in update_profile")
-
     if request.method == 'POST':
-        address = request.POST.get("Address")
-        email = request.POST.get("Email")
+        address = request.POST.get("address")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
         image = request.FILES.get("profile_picture")
-        print("img/",image)
-        username = request.POST.get("Username")
-        already_exist = User.objects.filter(username=username)
-
+        username = request.POST.get("username")
         user_id = request.POST.get("id")
         user = User.objects.get(pk=user_id)
-        profile = ProfileUser.objects.filter(user=user)[0]
+        profile = ProfileUser.objects.filter(user=user).first()
 
-        #Jika username taken by another person
-        if(username!=request.user.username and (len(already_exist)!=0 and already_exist[0].pk != profile.pk)):
+        if not profile:
+            return HttpResponseNotFound()
+
+        # Check if username is taken by another person
+        if username != request.user.username and User.objects.filter(username=username).exclude(pk=user_id).exists():
             messages.info(request, 'Username taken')
-            return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
-        if(len(username)==0):
-            messages.info(request, 'Username invalid')
-            return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
+            return JsonResponse({'status': 'error', 'message': 'Username taken'}, status=400)
         
-        #Jika bukan email
+        # Check if username is empty
+        if len(username) == 0:
+            messages.info(request, 'Username invalid')
+            return JsonResponse({'status': 'error', 'message': 'Username invalid'}, status=400)
+        
+        # Check if email is valid
         try:
             validate_email(email)
         except:
             messages.info(request, 'Invalid email')
-            return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
+            return JsonResponse({'status': 'error', 'message': 'Invalid email'}, status=400)
         
-        # check media validity
-        if image != None:
+        # Check image validity
+        if image:
             try:
                 img = Image.open(image)
                 img.verify()
             except:
                 messages.info(request, 'Invalid image')
-                return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
+                return JsonResponse({'status': 'error', 'message': 'Invalid image'}, status=400)
 
         profile.address = address
         profile.email = email
-        profile.profile_picture = image
+        if image:
+            profile.profile_picture = image
         user.username = username
+        user.set_password(password)
         user.save()
         profile.save()
+        print("ini pass")
+        print(password)
 
-        print(profile)
-        return HttpResponse(serializers.serialize('json',[profile]), content_type="application/json")
+        return JsonResponse({'status': 'success', 'message': 'Profile updated successfully',
+                             "profile": {
+                "username": profile.user.username,
+                "password": profile.user.password,
+                "email": profile.email,
+                "address": profile.address,
+                "pp_exist": True,
+                "profile_picture": profile.profile_picture.url,
+                
+            }},status=201)
+    
     return HttpResponseNotFound()
 
 @csrf_exempt
@@ -395,9 +454,10 @@ def get_username(request):
     user = User.objects.filter(pk=id)
     return HttpResponse(serializers.serialize('json',user), content_type="application/json")
 
-def sort_books_ajax(request,page_num,order_by):
-    sorted_books = get_katalog(page_num,order_by)
-    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
+# Unused function
+# def sort_books_ajax(request,page_num,order_by):
+#     sorted_books = get_katalog(page_num,order_by)
+#     return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
 
 @csrf_exempt
 def sort_books_ajax_search(request,page_num,order_by):
@@ -448,20 +508,22 @@ def sort_main_ajax_search(request,page_num):
         elif order_by_value == '6':
             order_by = "bawah_2000"
         else:
-            order_by = request.GET.get('order_by', 'asc')
+            order_by = request.POST.get('order_by', 'asc')
     else:
         order_by = request.GET.get('order_by', 'asc')
         
     sorted_books = search_katalog(last_searched, page_num,order_by)
     
-    return HttpResponse(serializers.serialize('json',sorted_books))
+    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
+
+
 @csrf_exempt
 def get_comments_ajax(request):
     if request.method == 'POST':
         id = request.POST.get("id")
         book = Book.objects.get(pk=id)
         comments = Comment.objects.filter(book=book)
-        return HttpResponse(serializers.serialize('json', comments))
+        return HttpResponse(serializers.serialize('json', comments), content_type="application/json")
 
 @csrf_exempt
 def add_comment_ajax(request):
@@ -469,7 +531,7 @@ def add_comment_ajax(request):
     if request.method == 'POST':
         print("masuk request==post")
         # if request.POST.is_valid():
-            
+        
         comment = escape(request.POST.get('comment'))
         print("comment",comment, type(comment))
         id = request.POST.get("id")
@@ -484,7 +546,6 @@ def add_comment_ajax(request):
         new_comment.save()
         return HttpResponse(b"CREATED", status=201)
     return HttpResponseNotFound()
-    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
 
 
 @csrf_exempt
@@ -492,11 +553,16 @@ def get_random_book_ajax(request):
     book = choice(Book.objects.all())
     return HttpResponse(serializers.serialize('json',[book]), content_type="application/json")
 
+
 # Function untuk mendapatkan data buku yang sudah dilike
 @csrf_exempt
 def get_liked_books_ajax(request):
+    print("masuk")
     if request.method == 'POST':
-        books = Like.objects.filter(user = request.user).order_by('-timestamp')
+        a = json.loads(request.body)
+        
+        
+        books = Like.objects.filter(user_id=a['id']).order_by('-timestamp')
         
         books = [like.book for like in books]
 
@@ -504,7 +570,4 @@ def get_liked_books_ajax(request):
         serialized_books = serializers.serialize('json', books)
 
         # Kirim data buku sebagai respons JSON
-        return JsonResponse({'status': 'success', 'books': serialized_books})
-
-    # Jika metode permintaan tidak valid
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+        return HttpResponse(serialized_books,content_type="application/json")

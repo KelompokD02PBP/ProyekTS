@@ -7,7 +7,7 @@
 
     {% if from_search %}
     <a href="{% url 'main:show_main_page' 1 %}">
-        <button style="background-color: #dfdfdf;color: #1a1a1a;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">Home</button>
+        <button style="background-color: #dfdfdf;color: ;font-size: larger;" onmouseover="this.style.backgroundColor='#808080' " onmouseout="this.style.backgroundColor='#dfdfdf'" class="btn btn-outline-secondary">Home</button>
     </a>
     {% else %}
     <form style="color: #ffffff"  name="search_bar" method="GET" action="{% url 'main:show_main_search' 1 %}">
