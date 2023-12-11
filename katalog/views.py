@@ -164,7 +164,7 @@ def get_sorted_book_json(request, book_name=""):
     elif order_by == "atas_2000":
         books = Book.objects.filter(title__istartswith=book_name, year_of_publish__gte=2000) | Book.objects.filter(title__icontains=book_name, year_of_publish__gte=2000) | Book.objects.filter(title__iendswith=book_name, year_of_publish__gte=2000)
     elif order_by == "bawah_2000":
-        books = Book.objects.filter(year_of_publish__lt=2000)
+        books = Book.objects.filter(title__istartswith=book_name, year_of_publish__lt=2000) | Book.objects.filter(title__icontains=book_name, year_of_publish__lt=2000) | Book.objects.filter(title__iendswith=book_name, year_of_publish__lt=2000)
 
     sorted_books = books
     sorted_books = sorted_books[:100]

@@ -159,6 +159,7 @@ def register(request):
     context = {'user_form':user_form, 'profile_form':profile_form}
     return render(request, 'register.html', context)
 
+@csrf_exempt
 def login_user(request):
     if request.method == 'POST':
         username = request.POST.get('username')
