@@ -113,8 +113,7 @@ def get_books(request):
     return HttpResponse("\n".join(res_list), content_type="text/plain")
 
 def get_books_json(request):
-    books = Book.objects.all()
-    books = books[:100]
+    books = Book.objects.all().order_by("title")
 
     return HttpResponse(serializers.serialize('json',books), content_type="application/json")
 
@@ -122,9 +121,9 @@ def get_search_book_json(request, book_name):
     tm = time.time() 
     # HOLY SHIT INI KENCENG BANGET
 
-    books = Book.objects.filter(title__istartswith=book_name)| Book.objects.filter(title__iendswith=book_name) | Book.objects.filter(title__icontains=book_name)
+    books = Book.objects.filter(title__istartswith=book_name)| Book.objects.filter(title__iendswith=book_name) | Book.objects.filter(title__icontains=book_name).order_by("title")
 
-    
+    print(books)
     return HttpResponse(serializers.serialize('json',books), content_type="application/json")
 
 @csrf_exempt
