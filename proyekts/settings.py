@@ -31,6 +31,32 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# cors
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'access-control-allow-origin',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://readify-d02-tk.pbp.cs.ui.ac.id",
+]
+
+CSRF_TRUSTED_ORIGINS = ['https://readify-d02-tk.pbp.cs.ui.ac.id/']
 
 # Application definition
 
@@ -149,13 +175,3 @@ MEDIA_ROOT= os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 django.setup()
-
-
-
-# cors
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SAMESITE = 'None'
