@@ -56,7 +56,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://readify-d02-tk.pbp.cs.ui.ac.id",
 ]
 
-CSRF_TRUSTED_ORIGINS = ['https://readify-d02-tk.pbp.cs.ui.ac.id/']
+CSRF_TRUSTED_ORIGINS = ['https://readify-d02-tk.pbp.cs.ui.ac.id']
 
 # Application definition
 
