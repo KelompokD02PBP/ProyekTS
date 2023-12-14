@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from main.forms import ProfileUserForm
 
+@csrf_exempt
 def login(request):
     username = request.POST['username']
     password = request.POST['password']
@@ -34,7 +35,7 @@ def login(request):
             "message": "Login gagal, periksa kembali email atau kata sandi."
         }, status=401)
 
-
+@csrf_exempt
 def logout(request):
     username = request.user.username
     try:
@@ -50,7 +51,7 @@ def logout(request):
         "message": "Logout gagal."
         }, status=401)
 
-
+@csrf_exempt
 def register(request):
     user_form = UserCreationForm(request.POST)
     profile_form = ProfileUserForm(request.POST or None, request.FILES or None)
