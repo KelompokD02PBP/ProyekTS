@@ -112,6 +112,7 @@ def get_books(request):
 
     return HttpResponse("\n".join(res_list), content_type="text/plain")
 
+@csrf_exempt
 def get_books_json(request):
     books = Book.objects.all().order_by("title")
 
@@ -125,6 +126,12 @@ def get_search_book_json(request, book_name):
 
     print(books)
     return HttpResponse(serializers.serialize('json',books), content_type="application/json")
+
+def get_search_book_json_by_pk(request, pk):
+    tm = time.time() 
+    # Menggunakan primary key (pk) untuk mencari buku
+    books = Book.objects.filter(pk=pk)
+    return HttpResponse(serializers.serialize('json', books), content_type="application/json")
 
 @csrf_exempt
 def get_sorted_book_json(request, book_name=""):

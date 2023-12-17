@@ -46,6 +46,7 @@ CORS_ALLOW_HEADERS = [
     'content-type',
     'dnt',
     'origin',
+    'rest_framework',
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
@@ -71,7 +72,12 @@ INSTALLED_APPS = [
     'main',
     'katalog',
 ]
-
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        # ... renderer lainnya ...
+    )
+}
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',

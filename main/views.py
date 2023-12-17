@@ -24,6 +24,11 @@ from django.contrib.auth.models import User
 
 from django.views.decorators.csrf import csrf_exempt
 from .models import Like
+from rest_framework import generics
+from .models import Like
+from .serializers import *
+from django.shortcuts import get_object_or_404
+
 
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = 10000000
@@ -184,6 +189,7 @@ def logout_user(request):
     return response
 
 
+@csrf_exempt
 def get_katalog(page_num,order_by):
     result=[]
     books = Book.objects.all()
@@ -568,3 +574,26 @@ def get_liked_books_ajax(request):
 
         # Kirim data buku sebagai respons JSON
         return HttpResponse(serialized_books,content_type="application/json")
+    
+    
+# @csrf_exempt
+class LikeListCreateView(generics.ListCreateAPIView):
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+# @csrf_exempt
+class LikeDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+
+# @csrf_exempt
+class UserListCreateView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+# @csrf_exempt=
+class UserDetailView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        username = self.kwargs['username']
+        return get_object_or_404(User, username=username)

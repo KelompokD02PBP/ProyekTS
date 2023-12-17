@@ -28,5 +28,10 @@ urlpatterns = [
     path('randombookapi/', get_random_book_ajax, name="get_random_book_ajax"),
 
     path('get-liked-books/', get_liked_books_ajax, name="get_liked_books"),
-    path('show_profile_flutter/', show_profile_flutter, name="show_profile_flutter")
+    path('show_profile_flutter/', show_profile_flutter, name="show_profile_flutter"),
+    # API BARU
+    path('likes/', LikeListCreateView.as_view(), name='like-list'),
+    path('likes/<int:pk>/', LikeDetailView.as_view(), name='like-detail'),
+    path('userapi/', UserListCreateView.as_view(), name='user-list'),
+    path('userapi/<str:username>/', UserDetailView.as_view(), name='user-detail'),
 ]
