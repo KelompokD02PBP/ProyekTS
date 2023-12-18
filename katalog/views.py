@@ -3,11 +3,7 @@ from django.shortcuts import render
 from .models import Book
 from django.http import HttpResponse
 from proyekts.settings import BASE_DIR
-import pandas as pd
-import csv
-import os
 import time
-import re
 from django.views.decorators.csrf import csrf_exempt
 
 from django.core import serializers
@@ -114,7 +110,7 @@ def get_books(request):
 
 @csrf_exempt
 def get_books_json(request):
-    books = Book.objects.all().order_by("title")
+    books = Book.objects.all().order_by("title")[:10]
 
     return HttpResponse(serializers.serialize('json',books), content_type="application/json")
 

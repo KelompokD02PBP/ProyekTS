@@ -29,6 +29,11 @@ urlpatterns = [
 
     path('get-liked-books/', get_liked_books_ajax, name="get_liked_books"),
     path('show_profile_flutter/', show_profile_flutter, name="show_profile_flutter"),
+
+    path('like-dislike-flutter/', like_dislike_ajax_flutter, name="like_dislike_flutter"),
+    path('add-like-flutter/', add_like_ajax_flutter, name="add_like_ajax_flutter"),
+    path('see-like-flutter/', see_like_ajax_flutter, name="see_like_ajax_flutter"),
+    path('get-comment-flutter/<int:id>', get_comments_ajax_flutter, name="get_comment_ajax_flutter"),
     # API BARU
     path('likes/', LikeListCreateView.as_view(), name='like-list'),
     path('likes/<int:pk>/', LikeDetailView.as_view(), name='like-detail'),

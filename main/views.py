@@ -17,7 +17,7 @@ from .models import Like, ProfileUser, Comment
 from .forms import ProfileUserForm, CommentForm
 from django.utils.html import escape
 
-from django.core import serializers
+from django.core import serializers as ser
 from django.core.validators import validate_email
 
 from django.contrib.auth.models import User
@@ -370,7 +370,7 @@ def see_like_ajax(request):
         likes = Like.objects.filter(book=book)
         # print("likes", type(likes))
 
-        return HttpResponse(serializers.serialize('json',likes), content_type="application/json")
+        return HttpResponse(ser.serialize('json',likes), content_type="application/json")
     return HttpResponseNotFound()
 
 #Function untuk mengetahui apakah user dalam kondisi like atau tidak terhadap buku
@@ -382,7 +382,7 @@ def like_dislike_ajax(request):
         book = Book.objects.get(pk=id)
         likes = Like.objects.filter(book=book, user = request.user)
 
-        return HttpResponse(serializers.serialize('json',likes), content_type="application/json")
+        return HttpResponse(ser.serialize('json',likes), content_type="application/json")
     return HttpResponseNotFound()
 
 @csrf_exempt
@@ -455,17 +455,17 @@ def get_username(request):
     id = request.POST.get("id")
     print("id in getusername",id)
     user = User.objects.filter(pk=id)
-    return HttpResponse(serializers.serialize('json',user), content_type="application/json")
+    return HttpResponse(ser.serialize('json',user), content_type="application/json")
 
 # Unused function
 # def sort_books_ajax(request,page_num,order_by):
 #     sorted_books = get_katalog(page_num,order_by)
-#     return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
+#     return HttpResponse(ser.serialize('json',sorted_books), content_type="application/json")
 
 @csrf_exempt
 def sort_books_ajax_search(request,page_num,order_by):
     sorted_books = search_katalog(last_searched, page_num,order_by)
-    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
+    return HttpResponse(ser.serialize('json',sorted_books), content_type="application/json")
 
 @csrf_exempt
 def sort_main_ajax(request,page_num):
@@ -491,7 +491,7 @@ def sort_main_ajax(request,page_num):
         
     sorted_books = get_katalog(page_num,order_by)
     
-    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
+    return HttpResponse(ser.serialize('json',sorted_books), content_type="application/json")
 
 @csrf_exempt
 def sort_main_ajax_search(request,page_num):
@@ -517,7 +517,7 @@ def sort_main_ajax_search(request,page_num):
         
     sorted_books = search_katalog(last_searched, page_num,order_by)
     
-    return HttpResponse(serializers.serialize('json',sorted_books), content_type="application/json")
+    return HttpResponse(ser.serialize('json',sorted_books), content_type="application/json")
 
 
 @csrf_exempt
@@ -526,7 +526,7 @@ def get_comments_ajax(request):
         id = request.POST.get("id")
         book = Book.objects.get(pk=id)
         comments = Comment.objects.filter(book=book)
-        return HttpResponse(serializers.serialize('json', comments), content_type="application/json")
+        return HttpResponse(ser.serialize('json', comments), content_type="application/json")
 
 @csrf_exempt
 def add_comment_ajax(request):
@@ -554,7 +554,7 @@ def add_comment_ajax(request):
 @csrf_exempt
 def get_random_book_ajax(request):
     book = choice(Book.objects.all())
-    return HttpResponse(serializers.serialize('json',[book]), content_type="application/json")
+    return HttpResponse(ser.serialize('json',[book]), content_type="application/json")
 
 
 # Function untuk mendapatkan data buku yang sudah dilike
@@ -570,7 +570,7 @@ def get_liked_books_ajax(request):
         books = [like.book for like in books]
 
         # Serialisasi data buku ke dalam format JSON
-        serialized_books = serializers.serialize('json', books)
+        serialized_books = ser.serialize('json', books)
 
         # Kirim data buku sebagai respons JSON
         return HttpResponse(serialized_books,content_type="application/json")
@@ -597,3 +597,80 @@ class UserDetailView(generics.RetrieveAPIView):
     def get_object(self):
         username = self.kwargs['username']
         return get_object_or_404(User, username=username)
+    
+@csrf_exempt
+def like_dislike_ajax_flutter(request):
+    print("in like_dislike views.py")
+    if request.method == 'POST':
+        a = json.loads(request.body)
+        print(a)
+        idBook = a.get("idBook")
+        idUser = a.get("idUser")
+        print("book",idBook, "user", idUser)
+        book = Book.objects.get(pk=idBook)
+        user = User.objects.get(pk=idUser)
+        
+        likes = Like.objects.filter(book=book, user = user)
+        if(len(likes)==1):
+            likes=1
+        else:
+            likes=0
+
+        return JsonResponse({'status': 'success', 'message': 'Like get successfully',
+                            "like":likes},status=201)
+    return HttpResponseNotFound()
+
+@csrf_exempt
+def add_like_ajax_flutter(request):
+    # print("in add_like_ajax views.py")
+    if request.method == 'POST':
+        a = json.loads(request.body)
+        print(a)
+        idBook = a.get("idBook")
+        idUser = a.get("idUser")
+        book = Book.objects.get(pk=idBook)
+        user = User.objects.get(pk=idUser)
+
+        has_like = Like.objects.filter(book = book, user = user)
+        # print("has like =",has_like)
+
+        # print("anjing", book, request.user)
+        if len(has_like)==0:
+            like = Like(user = user,
+                        book = book
+                        )
+            # print("like",like)
+            like.save()
+            print(user,"like book",book)
+            return JsonResponse({'status': 'success', 'message': 'LIKED'},status=201)
+        else:
+            print(user,"DISlike book",book)
+            has_like.delete()
+            return JsonResponse({'status': 'success', 'message': 'DISLIKED'},status=201)
+
+    return HttpResponseNotFound()
+
+@csrf_exempt
+def see_like_ajax_flutter(request):
+    # print("in add_like_ajax views.py")
+    if request.method == 'POST':
+        a = json.loads(request.body)
+        print(a)
+        idBook = a.get("idBook")
+        # print("id",id)
+        book = Book.objects.get(pk=idBook)
+        likes = Like.objects.filter(book=book)
+        # print("likes", type(likes))
+
+        return JsonResponse({'status': 'success', 'message': 'DISLIKED', 'like':len(likes)},status=201)
+    return HttpResponseNotFound()
+
+@csrf_exempt
+def get_comments_ajax_flutter(request, id):
+    if request.method == 'GET':
+        # a = json.loads(request.body)
+        # print(a)
+        # id = a.get("id")
+        book = Book.objects.get(pk=id)
+        comments = Comment.objects.filter(book=book)
+        return HttpResponse(ser.serialize('json', comments), content_type="application/json")

@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'main',
     'katalog',
+    'api',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
