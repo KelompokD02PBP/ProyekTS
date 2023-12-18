@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Like
+from .models import Like, Comment
 from django.contrib.auth.models import User
 
 class LikeSerializer(serializers.ModelSerializer):

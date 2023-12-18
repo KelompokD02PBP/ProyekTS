@@ -34,6 +34,7 @@ urlpatterns = [
     path('add-like-flutter/', add_like_ajax_flutter, name="add_like_ajax_flutter"),
     path('see-like-flutter/', see_like_ajax_flutter, name="see_like_ajax_flutter"),
     path('get-comment-flutter/<int:id>', get_comments_ajax_flutter, name="get_comment_ajax_flutter"),
+    path('add-comment-flutter/', add_comment_ajax_flutter, name="add_comment_ajax_flutter"),
     # API BARU
     path('likes/', LikeListCreateView.as_view(), name='like-list'),
     path('likes/<int:pk>/', LikeDetailView.as_view(), name='like-detail'),

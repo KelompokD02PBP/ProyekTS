@@ -673,4 +673,38 @@ def get_comments_ajax_flutter(request, id):
         # id = a.get("id")
         book = Book.objects.get(pk=id)
         comments = Comment.objects.filter(book=book)
-        return HttpResponse(ser.serialize('json', comments), content_type="application/json")
+        a=[]
+        # for c in comments:
+        #     a.append(CommentSerializer(c).data)
+        # print("a",a)
+        print(CommentSerializer(comments))
+        return HttpResponse(ser.serialize("json", comments), content_type="application/json")
+        # return HttpResponse(ser.serialize('json', a), content_type="application/json")
+    
+@csrf_exempt
+def add_comment_ajax_flutter(request):
+    if request.method == 'POST':
+        a = json.loads(request.body)
+        print(a)
+        idBook = a.get("idBook")
+        idUser = a.get("idUser")
+        
+        comment = escape(a.get('comment'))
+        
+        user = User.objects.get(pk=idUser)
+        book = get_object_or_404(Book, pk=idBook)
+
+        new_comment = Comment(book=book, user=user, comment=comment)
+        print(new_comment)
+        new_comment.save()
+
+        comments = Comment.objects.filter(book=book)
+        return JsonResponse({'status': 'success', 'message': 'COMMENTED', "comment": ser.serialize('json', comments)},status=201)
+    return HttpResponseNotFound()
+
+@csrf_exempt
+def get_username(request):
+    a = json.loads(request.body)
+    id = a.get("idUser")
+    user = User.objects.get(pk=id)
+    return JsonResponse({'status': 'success', "username": [user.username]},status=201)
