@@ -677,7 +677,6 @@ def get_comments_ajax_flutter(request, id):
         # for c in comments:
         #     a.append(CommentSerializer(c).data)
         # print("a",a)
-        print(CommentSerializer(comments))
         return HttpResponse(ser.serialize("json", comments), content_type="application/json")
         # return HttpResponse(ser.serialize('json', a), content_type="application/json")
     
