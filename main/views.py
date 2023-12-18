@@ -576,7 +576,7 @@ def get_liked_books_ajax(request):
         return HttpResponse(serialized_books,content_type="application/json")
     
     
-@csrf_exempt
+# @csrf_exempt
 class LikeListCreateView(generics.ListCreateAPIView):
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
