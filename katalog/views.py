@@ -110,7 +110,7 @@ def get_books(request):
 
 @csrf_exempt
 def get_books_json(request):
-    books = Book.objects.all().order_by("title")[:10]
+    books = Book.objects.all().order_by("title")
 
     return HttpResponse(serializers.serialize('json',books), content_type="application/json")
 
