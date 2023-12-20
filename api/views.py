@@ -67,8 +67,14 @@ def register(request):
             # Tambahkan data lainnya jika ingin mengirim data ke Flutter.
         }, status=200)
     
+    message = "Register failed because:\n"
+    for field, error in user_form.errors.items:
+        message += f"- {error}\n"
+    for field, error in profile_form.errors.items:
+        message += f"- {error}\n"
+
     return JsonResponse({
         "status": False,
-        "message": "Register gagal, tidak valid."
+        "message": message
     }, status=401)
     

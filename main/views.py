@@ -576,10 +576,11 @@ def get_liked_books_ajax(request):
         return HttpResponse(serialized_books,content_type="application/json")
     
     
-@csrf_exempt
+# @csrf_exempt
 class LikeListCreateView(generics.ListCreateAPIView):
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
+
 # @csrf_exempt
 class LikeDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Like.objects.all()
@@ -589,6 +590,7 @@ class LikeDetailView(generics.RetrieveUpdateDestroyAPIView):
 class UserListCreateView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
 # @csrf_exempt=
 class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
