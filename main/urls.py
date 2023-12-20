@@ -27,5 +27,9 @@ urlpatterns = [
     path('get-comment/',get_comments_ajax , name="get_comments_ajax"),
     path('randombookapi/', get_random_book_ajax, name="get_random_book_ajax"),
 
-   path('get-liked-books/', get_liked_books_ajax, name="get_liked_books"),
+    path('get-liked-books/', get_liked_books_ajax, name="get_liked_books"),
+
+    path('get-comments-flutter/<int:id>', get_comments_flutter, name="get_comments_flutter"),
+    path('add-comment-flutter', add_comment_flutter, name="add_comment_flutter"),
+    path('get-username', get_username, name="get_username"),
 ]

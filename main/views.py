@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.forms import UserCreationForm
@@ -454,13 +455,14 @@ def sort_main_ajax_search(request,page_num):
     sorted_books = search_katalog(last_searched, page_num,order_by)
     
     return HttpResponse(serializers.serialize('json',sorted_books))
+
 @csrf_exempt
 def get_comments_ajax(request):
     if request.method == 'POST':
         id = request.POST.get("id")
         book = Book.objects.get(pk=id)
         comments = Comment.objects.filter(book=book)
-        return HttpResponse(serializers.serialize('json', comments))
+        return HttpResponse(serializers.serialize('json', comments), content_type="application/json")
 
 @csrf_exempt
 def add_comment_ajax(request):
@@ -507,3 +509,37 @@ def get_liked_books_ajax(request):
 
     # Jika metode permintaan tidak valid
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+
+@csrf_exempt
+def get_comments_flutter(request, id):
+    if request.method == 'GET':
+        book = Book.objects.get(pk=id)
+        comments = Comment.objects.filter(book=book)
+        return HttpResponse(serializers.serialize("json", comments), content_type="application/json")
+    
+@csrf_exempt
+def add_comment_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        idBook = data.get("idBook")
+        idUser = data.get("idUser")
+        comment = escape(data.get('comment'))
+        
+        user = User.objects.get(pk=idUser)
+        book = get_object_or_404(Book, pk=idBook)
+
+        new_comment = Comment(book=book, user=user, comment=comment)
+        print(new_comment)
+        new_comment.save()
+
+        comments = Comment.objects.filter(book=book)
+        return JsonResponse({'status': 'success', "comment": serializers.serialize('json', comments)},status=201)
+    return HttpResponseNotFound()
+
+@csrf_exempt
+def get_username(request):
+    data = json.loads(request.body)
+    id = data.get("idUser")
+    user = User.objects.get(pk=id)
+    return JsonResponse({'status': 'success', "username": [user.username]},status=201)
